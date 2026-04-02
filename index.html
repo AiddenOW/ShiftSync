@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -9,13 +9,24 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ShiftSync">
     
-    <!-- Icône mise à jour pour le nouveau nom "ShiftSync" (Un "S" blanc sur fond bleu) -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%232563EB'/%3E%3Ctext x='50%25' y='50%25' font-family='system-ui, sans-serif' font-weight='bold' font-size='320' fill='white' text-anchor='middle' dominant-baseline='central'%3ES%3C/text%3E%3C/svg%3E">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%232563EB'/%3E%3Ctext x='50%25' y='50%25' font-family='system-ui, sans-serif' font-weight='bold' font-size='320' fill='white' text-anchor='middle' dominant-baseline='central'%3ES%3C/text%3E%3C/svg%3E">
-
+    <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300c6ff'/%3E%3Cstop offset='100%25' stop-color='%230072ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='128' fill='url(%23grad)'/%3E%3Ctext x='50%25' y='53%25' font-family='-apple-system, sans-serif' font-weight='900' font-size='340' fill='white' text-anchor='middle' dominant-baseline='central' letter-spacing='-10'%3ES%3C/text%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300c6ff'/%3E%3Cstop offset='100%25' stop-color='%230072ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='128' fill='url(%23grad)'/%3E%3Ctext x='50%25' y='53%25' font-family='-apple-system, sans-serif' font-weight='900' font-size='340' fill='white' text-anchor='middle' dominant-baseline='central' letter-spacing='-10'%3ES%3C/text%3E%3C/svg%3E">
     <link id="manifest-link" rel="manifest" href="">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0f172a',
+                        darkcard: '#1e293b'
+                    }
+                }
+            }
+        }
+    </script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -25,13 +36,18 @@
             -webkit-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            background-color: #f8fafc;
         }
         .safe-top { padding-top: env(safe-area-inset-top); }
         .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        
+        /* Transition douce pour le dark mode */
+        * { transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
+        
+        /* Custom Scrollbar cachee */
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body>
+<body class="bg-slate-100 dark:bg-darkbg text-slate-900 dark:text-slate-100 transition-colors duration-300">
     <div id="root"></div>
 
     <script>
@@ -42,7 +58,7 @@
             background_color: "#f8fafc",
             theme_color: "#2563EB",
             icons: [{
-                src: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%232563EB'/%3E%3Ctext x='50%25' y='50%25' font-family='system-ui, sans-serif' font-weight='bold' font-size='320' fill='white' text-anchor='middle' dominant-baseline='central'%3ES%3C/text%3E%3C/svg%3E",
+                src: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300c6ff'/%3E%3Cstop offset='100%25' stop-color='%230072ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='128' fill='url(%23grad)'/%3E%3Ctext x='50%25' y='53%25' font-family='-apple-system, sans-serif' font-weight='900' font-size='340' fill='white' text-anchor='middle' dominant-baseline='central' letter-spacing='-10'%3ES%3C/text%3E%3C/svg%3E",
                 sizes: "512x512",
                 type: "image/svg+xml",
                 purpose: "any maskable"
@@ -55,16 +71,23 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        const IconUser = () => <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
-        const IconChevronRight = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>;
+        // --- ICONES ---
+        const IconUser = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
+        const IconUsers = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
+        const IconChevronRight = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>;
         const IconChevronLeft = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>;
-        const IconChevronRightLarge = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>;
-        const IconCalendar = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>;
+        const IconCalendar = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>;
         const IconLogOut = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>;
         const IconClock = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
         const IconCoffee = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>;
+        const IconSun = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>;
+        const IconMoon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>;
+        const IconShare = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>;
+        const IconEdit = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>;
+        const IconBell = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>;
 
-        // Remplacement de Théo par Stéphanie dans les données
+        // --- DONNÉES ---
+        const EMPLOYEES = ['Tom', 'Anthony', 'Stéphanie'];
         const SCHEDULE_CYCLE = [
             { // Semaine 1
                 Tom: { lundi: "repos", mardi: "12h - 19h30", mercredi: "9h30 - 17h", jeudi: "11h - 18h30", vendredi: "12h - 19h30", samedi: "9h30 - 17h" },
@@ -82,9 +105,9 @@
                 Stéphanie: { lundi: "12h - 19h30", mardi: "9h30 - 17h", mercredi: "repos", jeudi: "12h - 19h30", vendredi: "9h30 - 17h", samedi: "11h - 18h30" }
             }
         ];
+        const DAYS_OF_WEEK = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
 
-        const DAYS_OF_WEEK = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
-
+        // --- UTILITAIRES ---
         const getMonday = (d) => {
             const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
             const day = date.getUTCDay();
@@ -99,7 +122,6 @@
             const diffTime = targetMonday.getTime() - refDate.getTime();
             const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
             const diffWeeks = Math.floor(diffDays / 7);
-            
             return ((diffWeeks % 3) + 3) % 3;
         };
 
@@ -107,48 +129,118 @@
             return `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(dateObj.getDate()).padStart(2,'0')}`;
         };
 
+        // Calcule le nombre d'heures travaillées à partir d'une chaîne "9h30 - 17h"
+        const parseHours = (shiftStr) => {
+            if (!shiftStr || shiftStr.toLowerCase() === 'repos' || shiftStr.toLowerCase() === 'absent') return 0;
+            const regex = /(\d{1,2})h(?:(\d{2}))?\s*(?:-|à)\s*(\d{1,2})h(?:(\d{2}))?/i;
+            const match = shiftStr.match(regex);
+            if(match) {
+                const startH = parseInt(match[1]);
+                const startM = match[2] ? parseInt(match[2]) : 0;
+                const endH = parseInt(match[3]);
+                const endM = match[4] ? parseInt(match[4]) : 0;
+                let duration = (endH + endM/60) - (startH + startM/60);
+                return duration > 0 ? duration : 0;
+            }
+            return 0;
+        };
+
+        // --- COMPOSANT PRINCIPAL ---
         function App() {
-            // Mise à jour de la clé du localStorage
             const [employee, setEmployee] = useState(localStorage.getItem('shiftsync_profile') || null);
+            const [activeTab, setActiveTab] = useState('me'); // 'me' ou 'team'
             const [currentViewDate, setCurrentViewDate] = useState(new Date());
+            
+            // Dark mode
+            const [isDarkMode, setIsDarkMode] = useState(() => {
+                const saved = localStorage.getItem('shiftsync_theme');
+                if (saved) return saved === 'dark';
+                return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            });
+
+            // Exceptions (Changements d'horaires exceptionnels)
+            const [exceptions, setExceptions] = useState(() => JSON.parse(localStorage.getItem('shiftsync_exceptions') || '{}'));
+            
+            // UI States
+            const [toast, setToast] = useState(null);
+            const [editModal, setEditModal] = useState(null); // { dateString, employeeName, currentShift }
+
+            useEffect(() => {
+                if (isDarkMode) document.documentElement.classList.add('dark');
+                else document.documentElement.classList.remove('dark');
+                localStorage.setItem('shiftsync_theme', isDarkMode ? 'dark' : 'light');
+            }, [isDarkMode]);
+
+            useEffect(() => {
+                localStorage.setItem('shiftsync_exceptions', JSON.stringify(exceptions));
+            }, [exceptions]);
+
+            const showToast = (msg) => {
+                setToast(msg);
+                setTimeout(() => setToast(null), 3000);
+            };
 
             const handleSetEmployee = (name) => {
                 setEmployee(name);
-                if (name) {
-                    localStorage.setItem('shiftsync_profile', name);
+                if (name) localStorage.setItem('shiftsync_profile', name);
+                else localStorage.removeItem('shiftsync_profile');
+            };
+
+            // Fonction pour obtenir l'horaire final (base + exceptions)
+            const getShiftForDate = (dateObj, empName) => {
+                const dateStr = generateDateString(dateObj);
+                if (exceptions[dateStr] && exceptions[dateStr][empName]) {
+                    return exceptions[dateStr][empName]; // Exception trouvée
+                }
+                const day = dateObj.getDay();
+                if (day === 0) return 'repos'; // Dimanche
+                const dayName = DAYS_OF_WEEK[day - 1];
+                const cycle = getCycleIndex(dateObj);
+                return SCHEDULE_CYCLE[cycle][empName][dayName];
+            };
+
+            const saveException = (dateStr, empName, newShift) => {
+                setExceptions(prev => {
+                    const updated = { ...prev };
+                    if (!updated[dateStr]) updated[dateStr] = {};
+                    updated[dateStr][empName] = newShift;
+                    return updated;
+                });
+                setEditModal(null);
+                showToast("Horaire mis à jour !");
+            };
+
+            const handleShare = (weekDates, totalHours) => {
+                const mondayStr = weekDates[0].date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                let text = `🗓️ *Mon planning ShiftSync (Sem. du ${mondayStr})*\n\n`;
+                weekDates.forEach(d => { text += `• ${d.dayName} : ${d.horaire}\n`; });
+                text += `\n⏱️ Total estimé : ${totalHours}h`;
+
+                if (navigator.share) {
+                    navigator.share({ title: 'Mon Planning', text: text }).catch(() => {});
                 } else {
-                    localStorage.removeItem('shiftsync_profile');
+                    navigator.clipboard.writeText(text);
+                    showToast("Planning copié dans le presse-papier !");
                 }
             };
 
-            const today = new Date();
-            const todayStr = generateDateString(today);
-
             if (!employee) {
                 return (
-                    <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-6 font-sans safe-top safe-bottom">
-                        <div className="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md text-center">
-                            <div className="bg-blue-600 text-white w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-200">
-                                <span className="text-4xl font-bold">S</span>
+                    <div className="min-h-screen flex flex-col items-center justify-center p-6 safe-top safe-bottom">
+                        <div className="bg-white dark:bg-darkcard rounded-3xl shadow-xl p-8 w-full max-w-md text-center border border-slate-100 dark:border-slate-800">
+                            <div className="bg-gradient-to-br from-cyan-400 to-blue-600 text-white w-20 h-20 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/40">
+                                <span className="text-[2.75rem] font-black tracking-tighter">S</span>
                             </div>
-                            <h1 className="text-3xl font-bold text-slate-800 mb-2">ShiftSync</h1>
-                            <p className="text-slate-500 mb-8">Sélectionnez votre profil pour commencer</p>
+                            <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">ShiftSync</h1>
+                            <p className="text-slate-500 dark:text-slate-400 mb-8">Sélectionnez votre profil pour commencer</p>
                             
                             <div className="space-y-4">
-                                {/* Remplacement de Théo par Stéphanie dans les boutons */}
-                                {['Tom', 'Anthony', 'Stéphanie'].map((name) => (
-                                    <button
-                                        key={name}
-                                        onClick={() => handleSetEmployee(name)}
-                                        className="w-full bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-semibold py-4 px-6 rounded-2xl border-2 border-slate-100 hover:border-blue-200 transition-all active:scale-95 flex justify-between items-center"
+                                {EMPLOYEES.map((name) => (
+                                    <button key={name} onClick={() => handleSetEmployee(name)}
+                                        className="w-full bg-slate-50 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 font-semibold py-4 px-6 rounded-2xl border-2 border-slate-100 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-800 transition-all active:scale-95 flex justify-between items-center"
                                     >
-                                        <div className="flex items-center gap-3">
-                                            <IconUser />
-                                            <span className="text-lg">{name}</span>
-                                        </div>
-                                        <div className="text-slate-400">
-                                            <IconChevronRight />
-                                        </div>
+                                        <div className="flex items-center gap-3"><IconUser /><span className="text-lg">{name}</span></div>
+                                        <div className="text-slate-400 dark:text-slate-500"><IconChevronRight /></div>
                                     </button>
                                 ))}
                             </div>
@@ -157,128 +249,241 @@
                 );
             }
 
+            // Calculs pour la vue
             const currentMonday = getMonday(currentViewDate);
-            const cycleIndex = getCycleIndex(currentViewDate);
-            const weekSchedule = SCHEDULE_CYCLE[cycleIndex][employee];
+            const today = new Date();
+            const todayStr = generateDateString(today);
 
-            const prevWeek = () => {
-                const newDate = new Date(currentViewDate);
-                newDate.setDate(currentViewDate.getDate() - 7);
-                setCurrentViewDate(newDate);
-            };
-
-            const nextWeek = () => {
-                const newDate = new Date(currentViewDate);
-                newDate.setDate(currentViewDate.getDate() + 7);
-                setCurrentViewDate(newDate);
-            };
-
-            const goToToday = () => {
-                setCurrentViewDate(new Date());
-            };
-
+            // Génération des dates de la semaine pour l'onglet "Moi"
+            let totalHoursThisWeek = 0;
             const weekDates = DAYS_OF_WEEK.map((dayName, index) => {
                 const date = new Date(currentMonday);
                 date.setDate(currentMonday.getDate() + index);
-                return {
-                    dayName,
-                    date,
-                    dateString: generateDateString(date),
-                    horaire: weekSchedule[dayName]
-                };
+                const shift = getShiftForDate(date, employee);
+                totalHoursThisWeek += parseHours(shift);
+                return { dayName, date, dateString: generateDateString(date), horaire: shift };
             });
 
             return (
-                <div className="min-h-screen bg-slate-100 font-sans pb-10 safe-bottom">
-                    <header className="bg-blue-600 text-white shadow-md rounded-b-3xl px-6 pb-6 pt-12 safe-top mb-6">
+                <div className="min-h-screen pb-24 safe-bottom flex flex-col">
+                    {/* TOAST MESSAGE */}
+                    {toast && (
+                        <div className="fixed top-[calc(env(safe-area-inset-top)+1rem)] left-1/2 -translate-x-1/2 z-50 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl font-semibold flex items-center gap-2 animate-bounce">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            {toast}
+                        </div>
+                    )}
+
+                    {/* HEADER */}
+                    <header className="bg-blue-600 text-white shadow-md rounded-b-[1.5rem] px-6 pb-4 pt-[calc(env(safe-area-inset-top)+0.75rem)] sticky top-0 z-10">
                         <div className="max-w-md mx-auto flex justify-between items-center">
                             <div className="flex items-center gap-3">
-                                <div className="bg-white/20 w-12 h-12 rounded-xl flex items-center justify-center backdrop-blur-sm shadow-inner">
-                                    <span className="text-2xl font-bold">S</span>
+                                <div className="bg-gradient-to-br from-cyan-400 to-blue-600 w-12 h-12 rounded-xl flex items-center justify-center shadow-inner border border-white/20">
+                                    <span className="text-2xl font-black tracking-tighter">S</span>
                                 </div>
                                 <div>
                                     <h1 className="text-2xl font-bold tracking-tight">{employee}</h1>
-                                    <p className="text-blue-200 text-sm mt-1 flex items-center gap-1">
-                                        <IconCalendar />
-                                        Cycle: Semaine {cycleIndex + 1}
+                                    <p className="text-blue-100 text-sm mt-1 flex items-center gap-1 opacity-90">
+                                        <IconCalendar /> Semaine {getCycleIndex(currentViewDate) + 1}
                                     </p>
                                 </div>
                             </div>
-                            <button 
-                                onClick={() => handleSetEmployee(null)}
-                                className="bg-white/20 p-3 rounded-full hover:bg-white/30 transition backdrop-blur-sm active:scale-90"
-                            >
-                                <IconLogOut />
-                            </button>
+                            <div className="flex gap-2">
+                                <button onClick={() => setIsDarkMode(!isDarkMode)} className="bg-white/20 p-2.5 rounded-full hover:bg-white/30 transition backdrop-blur-sm active:scale-90">
+                                    {isDarkMode ? <IconSun /> : <IconMoon />}
+                                </button>
+                                <button onClick={() => handleSetEmployee(null)} className="bg-white/20 p-2.5 rounded-full hover:bg-white/30 transition backdrop-blur-sm active:scale-90 text-red-100 hover:text-white">
+                                    <IconLogOut />
+                                </button>
+                            </div>
                         </div>
                     </header>
 
-                    <main className="max-w-md mx-auto px-4">
-                        <div className="bg-white rounded-2xl shadow-sm p-2 mb-6 flex justify-between items-center">
-                            <button onClick={prevWeek} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 active:bg-blue-100 rounded-xl transition">
+                    <main className="max-w-md mx-auto px-4 flex-1 w-full mt-6">
+                        
+                        {/* NAVIGATION TEMPORELLE */}
+                        <div className="bg-white dark:bg-darkcard border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm p-2 mb-6 flex justify-between items-center">
+                            <button onClick={() => setCurrentViewDate(new Date(currentViewDate.setDate(currentViewDate.getDate() - (activeTab === 'me' ? 7 : 1))))} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-xl transition active:scale-90">
                                 <IconChevronLeft />
                             </button>
                             
-                            <button onClick={goToToday} className="flex flex-col items-center px-4 py-1 active:bg-slate-100 rounded-xl transition">
-                                <span className="text-xs font-semibold uppercase text-slate-400 tracking-wider">Semaine du</span>
-                                <span className="font-bold text-slate-800 text-lg">
-                                    {currentMonday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                            <button onClick={() => setCurrentViewDate(new Date())} className="flex flex-col items-center px-4 py-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition active:scale-95">
+                                <span className="text-xs font-semibold uppercase text-slate-400 dark:text-slate-500 tracking-wider">
+                                    {activeTab === 'me' ? 'Semaine du' : 'Aujourd\'hui'}
+                                </span>
+                                <span className="font-bold text-slate-800 dark:text-white text-lg">
+                                    {activeTab === 'me' 
+                                        ? currentMonday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+                                        : currentViewDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
+                                    }
                                 </span>
                             </button>
                             
-                            <button onClick={nextWeek} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 active:bg-blue-100 rounded-xl transition">
-                                <IconChevronRightLarge />
+                            <button onClick={() => setCurrentViewDate(new Date(currentViewDate.setDate(currentViewDate.getDate() + (activeTab === 'me' ? 7 : 1))))} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-xl transition active:scale-90">
+                                <IconChevronRight />
                             </button>
                         </div>
 
-                        <div className="space-y-4">
-                            {weekDates.map(({ dayName, date, dateString, horaire }) => {
-                                const isToday = dateString === todayStr;
-                                const isRepos = horaire.toLowerCase() === 'repos';
+                        {/* ONGLET 1 : MON PLANNING */}
+                        {activeTab === 'me' && (
+                            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                {/* Barre d'outils semaine */}
+                                <div className="flex justify-between items-center px-1 mb-2">
+                                    <div className="text-sm font-bold text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-800 px-3 py-1 rounded-lg">
+                                        Total : {totalHoursThisWeek}h
+                                    </div>
+                                    <button onClick={() => handleShare(weekDates, totalHoursThisWeek)} className="text-blue-600 dark:text-blue-400 text-sm font-bold flex items-center gap-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-3 py-1 rounded-lg transition">
+                                        <IconShare /> Partager
+                                    </button>
+                                </div>
 
-                                return (
-                                    <div 
-                                        key={dayName}
-                                        className={`relative overflow-hidden rounded-2xl p-5 border ${
-                                            isToday 
-                                                ? 'bg-blue-50 border-blue-200 shadow-md ring-2 ring-blue-500 ring-opacity-50' 
-                                                : isRepos 
-                                                    ? 'bg-slate-50 border-slate-200 opacity-70'
-                                                    : 'bg-white border-slate-100 shadow-sm'
-                                        } transition-all`}
-                                    >
-                                        {isToday && (
-                                            <div className="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl shadow-sm">
-                                                AUJOURD'HUI
-                                            </div>
-                                        )}
+                                {/* Liste des jours */}
+                                {weekDates.map(({ dayName, date, dateString, horaire }) => {
+                                    const isToday = dateString === todayStr;
+                                    const isRepos = horaire.toLowerCase() === 'repos';
+                                    const hasException = exceptions[dateString] && exceptions[dateString][employee];
 
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <h3 className={`capitalize font-bold text-lg ${isToday ? 'text-blue-800' : 'text-slate-800'}`}>
-                                                    {dayName}
-                                                </h3>
-                                                <p className="text-slate-500 text-sm">
-                                                    {date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
-                                                </p>
-                                            </div>
+                                    return (
+                                        <div key={dayName} className={`relative overflow-hidden rounded-2xl p-5 border ${
+                                                isToday ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 shadow-md ring-2 ring-blue-500/50' 
+                                                : isRepos ? 'bg-slate-50 dark:bg-darkbg border-slate-200 dark:border-slate-800 opacity-80'
+                                                : 'bg-white dark:bg-darkcard border-slate-100 dark:border-slate-700 shadow-sm'
+                                            } transition-all`}
+                                        >
+                                            {hasException && (
+                                                <div className="absolute top-0 left-0 bg-amber-400 text-amber-900 text-[9px] uppercase font-bold px-2 py-0.5 rounded-br-lg shadow-sm">
+                                                    Modifié
+                                                </div>
+                                            )}
+                                            {isToday && (
+                                                <div className="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl shadow-sm">
+                                                    AUJOURD'HUI
+                                                </div>
+                                            )}
 
-                                            <div className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold shadow-sm ${
-                                                isRepos 
-                                                    ? 'bg-slate-200 text-slate-600' 
-                                                    : isToday
-                                                        ? 'bg-blue-600 text-white shadow-blue-200'
-                                                        : 'bg-amber-100 text-amber-800'
-                                            }`}>
-                                                {isRepos ? <IconCoffee /> : <IconClock />}
-                                                {horaire}
+                                            <div className="flex items-center justify-between mt-1">
+                                                <div>
+                                                    <h3 className={`capitalize font-bold text-lg ${isToday ? 'text-blue-800 dark:text-blue-300' : 'text-slate-800 dark:text-slate-200'}`}>
+                                                        {dayName}
+                                                    </h3>
+                                                    <p className="text-slate-500 dark:text-slate-400 text-sm">
+                                                        {date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
+                                                    </p>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold shadow-sm ${
+                                                        isRepos ? 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400' 
+                                                        : isToday ? 'bg-blue-600 text-white shadow-blue-200 dark:shadow-none'
+                                                        : 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300'
+                                                    }`}>
+                                                        {isRepos ? <IconCoffee /> : <IconClock />}
+                                                        {horaire}
+                                                    </div>
+                                                    
+                                                    {/* Bouton pour modifier le shift */}
+                                                    <button onClick={() => setEditModal({dateString, empName: employee, currentShift: horaire})} className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg transition">
+                                                        <IconEdit />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* ONGLET 2 : VUE EQUIPE */}
+                        {activeTab === 'team' && (
+                            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-white px-2">L'équipe du jour</h2>
+                                
+                                {EMPLOYEES.map(empName => {
+                                    const shift = getShiftForDate(currentViewDate, empName);
+                                    const isRepos = shift.toLowerCase() === 'repos';
+                                    const dateStr = generateDateString(currentViewDate);
+                                    const hasException = exceptions[dateStr] && exceptions[dateStr][empName];
+                                    const isMe = empName === employee;
+
+                                    return (
+                                        <div key={empName} className={`flex items-center justify-between p-4 rounded-2xl border ${isMe ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-darkcard border-slate-100 dark:border-slate-800'}`}>
+                                            <div className="flex items-center gap-4">
+                                                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${isRepos ? 'bg-slate-100 dark:bg-slate-800 text-slate-400' : isMe ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300' : 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300'}`}>
+                                                    {empName.charAt(0)}
+                                                </div>
+                                                <div>
+                                                    <div className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                                        {empName} {isMe && <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full uppercase">Moi</span>}
+                                                    </div>
+                                                    {hasException && <div className="text-xs text-amber-500 font-medium mt-0.5">Horaire modifié</div>}
+                                                </div>
+                                            </div>
+                                            <div className={`px-3 py-1.5 rounded-lg font-bold text-sm ${isRepos ? 'bg-slate-100 dark:bg-slate-800 text-slate-500' : 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900'}`}>
+                                                {shift}
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        )}
                     </main>
+
+                    {/* BOTTOM NAVIGATION (Barre de menu style App) */}
+                    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-darkcard border-t border-slate-200 dark:border-slate-800 pb-safe pt-2 px-6 pb-4 z-20">
+                        <div className="max-w-md mx-auto flex justify-around">
+                            <button onClick={() => setActiveTab('me')} className={`flex flex-col items-center p-2 rounded-xl w-24 transition ${activeTab === 'me' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+                                <IconUser />
+                                <span className="text-[10px] font-bold mt-1 uppercase">Moi</span>
+                            </button>
+                            <button onClick={() => setActiveTab('team')} className={`flex flex-col items-center p-2 rounded-xl w-24 transition ${activeTab === 'team' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+                                <IconUsers />
+                                <span className="text-[10px] font-bold mt-1 uppercase">L'Équipe</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* MODAL EDITION D'HORAIRE (Exception) */}
+                    {editModal && (
+                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                            <div className="bg-white dark:bg-darkcard rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+                                <h3 className="text-xl font-bold mb-4 dark:text-white">Modifier l'horaire</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                                    Date : <strong className="text-slate-800 dark:text-slate-200">{new Date(editModal.dateString).toLocaleDateString('fr-FR', {weekday: 'long', day:'numeric', month:'long'})}</strong><br/>
+                                    Profil : <strong className="text-slate-800 dark:text-slate-200">{editModal.empName}</strong>
+                                </p>
+                                
+                                <input 
+                                    type="text" 
+                                    id="shiftInput"
+                                    defaultValue={editModal.currentShift}
+                                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-4 font-bold text-slate-800 dark:text-white mb-6 focus:ring-2 focus:ring-blue-500 outline-none"
+                                    placeholder="ex: 9h30 - 17h ou repos"
+                                />
+
+                                <div className="flex gap-3">
+                                    <button onClick={() => setEditModal(null)} className="flex-1 py-3 rounded-xl font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">
+                                        Annuler
+                                    </button>
+                                    <button onClick={() => saveException(editModal.dateString, editModal.empName, document.getElementById('shiftInput').value)} className="flex-1 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                                        Enregistrer
+                                    </button>
+                                </div>
+                                {/* Bouton pour réinitialiser à l'horaire de base */}
+                                {exceptions[editModal.dateString] && exceptions[editModal.dateString][editModal.empName] && (
+                                    <button onClick={() => {
+                                        setExceptions(prev => {
+                                            const up = {...prev}; delete up[editModal.dateString][editModal.empName]; return up;
+                                        });
+                                        setEditModal(null);
+                                        showToast("Horaire réinitialisé !");
+                                    }} className="w-full mt-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
+                                        Rétablir l'horaire normal
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             );
         }
@@ -288,3 +493,7 @@
     </script>
 </body>
 </html>
+
+
+
+
