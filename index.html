@@ -98,9 +98,12 @@
         const IconMoon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>;
         const IconShare = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>;
         const IconEdit = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>;
+        const IconKey = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>;
+        const IconPlane = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 3.3c-.2.5.1 1 .6 1.1l7.3 1.9-4.7 4.7-2.6-.4c-.4-.1-.8.1-1 .5l-1.1 1.6c-.2.4.1.9.5 1l3.7 1 1 3.7c.1.4.6.7 1 .5l1.6-1.1c.4-.2.6-.6.5-1l-.4-2.6 4.7-4.7 1.9 7.3c.1.5.6.8 1.1.6l3.3-1.2c.5-.2.8-.6.7-1.1z"></path></svg>;
 
         // --- DONNÉES ---
         const EMPLOYEES = ['Tom', 'Anthony', 'Stéphanie', 'Raphaël', 'Max', 'Jérôme', 'Nicolas', 'Jean-Benoît'];
+        
         const DAYS_OF_WEEK = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
 
         // 1. Cycle de 3 semaines
@@ -173,7 +176,7 @@
         };
 
         const parseHours = (shiftStr) => {
-            if (!shiftStr || shiftStr.toLowerCase() === 'repos' || shiftStr.toLowerCase() === 'absent') return 0;
+            if (!shiftStr || shiftStr.toLowerCase().includes('repos') || shiftStr.toLowerCase().includes('cong') || shiftStr.toLowerCase() === 'absent') return 0;
             const regex = /(\d{1,2})h(?:(\d{2}))?\s*(?:-|à)\s*(\d{1,2})h(?:(\d{2}))?/i;
             const match = shiftStr.match(regex);
             if(match) {
@@ -193,6 +196,27 @@
             const [activeTab, setActiveTab] = useState('me');
             const [currentViewDate, setCurrentViewDate] = useState(new Date());
             
+            // États pour le système de connexion par PIN
+            const [loginModalUser, setLoginModalUser] = useState(null);
+            const [pinInput, setPinInput] = useState('');
+            const [pinError, setPinError] = useState(false);
+            
+            // Nouveaux états pour le changement de PIN
+            const [isChangingPin, setIsChangingPin] = useState(false);
+            const [newPinInput, setNewPinInput] = useState('');
+            const [confirmNewPinInput, setConfirmNewPinInput] = useState('');
+            const [changePinError, setChangePinError] = useState('');
+
+            // États pour le changement de PIN volontaire (quand déjà connecté)
+            const [isChangingActivePin, setIsChangingActivePin] = useState(false);
+            const [activeNewPin, setActiveNewPin] = useState('');
+            const [activeConfirmPin, setActiveConfirmPin] = useState('');
+            const [activePinError, setActivePinError] = useState('');
+
+            // Nouveaux états pour les congés
+            const [vacationStart, setVacationStart] = useState('');
+            const [vacationEnd, setVacationEnd] = useState('');
+
             const [isDarkMode, setIsDarkMode] = useState(() => {
                 const saved = localStorage.getItem('shiftsync_theme');
                 if (saved) return saved === 'dark';
@@ -201,6 +225,8 @@
 
             // Exceptions gérées par Firebase (synchronisation temps réel)
             const [exceptions, setExceptions] = useState({});
+            // Ajout de l'état pour les PINs depuis Firebase
+            const [employeePins, setEmployeePins] = useState({});
             const [toast, setToast] = useState(null);
             const [editModal, setEditModal] = useState(null);
 
@@ -210,19 +236,38 @@
                 localStorage.setItem('shiftsync_theme', isDarkMode ? 'dark' : 'light');
             }, [isDarkMode]);
 
-            // Ecoute des modifications Firebase
+            // Ecoute des modifications Firebase (Exceptions + PINs)
             useEffect(() => {
-                const unsubscribe = db.collection('exceptions').onSnapshot((snapshot) => {
+                // Écoute des exceptions
+                const unsubscribeExceptions = db.collection('exceptions').onSnapshot((snapshot) => {
                     const newExceptions = {};
                     snapshot.forEach((doc) => {
                         newExceptions[doc.id] = doc.data();
                     });
                     setExceptions(newExceptions);
                 }, (error) => {
-                    console.error("Erreur Firebase:", error);
+                    console.error("Erreur Firebase (exceptions):", error);
                 });
 
-                return () => unsubscribe(); // Nettoyage
+                // Écoute des PINs
+                const unsubscribePins = db.collection('settings').doc('pins').onSnapshot((doc) => {
+                    if (doc.exists) {
+                        setEmployeePins(doc.data());
+                    } else {
+                        // Si le document n'existe pas, initialiser avec 0000 pour tout le monde
+                        const defaultPins = {};
+                        EMPLOYEES.forEach(emp => defaultPins[emp] = '0000');
+                        db.collection('settings').doc('pins').set(defaultPins);
+                        setEmployeePins(defaultPins);
+                    }
+                }, (error) => {
+                    console.error("Erreur Firebase (pins):", error);
+                });
+
+                return () => {
+                    unsubscribeExceptions();
+                    unsubscribePins();
+                };
             }, []);
 
             const showToast = (msg) => {
@@ -230,10 +275,98 @@
                 setTimeout(() => setToast(null), 3000);
             };
 
-            const handleSetEmployee = (name) => {
-                setEmployee(name);
-                if (name) localStorage.setItem('shiftsync_profile', name);
-                else localStorage.removeItem('shiftsync_profile');
+            const handleLoginAttempt = (name) => {
+                setLoginModalUser(name);
+                setPinInput('');
+                setPinError(false);
+                setIsChangingPin(false); // Reset mode changement de PIN
+                setChangePinError('');
+            };
+
+            const handlePinSubmit = () => {
+                // Le code attendu (celui de Firebase, ou '0000' par défaut si pas encore chargé)
+                const expectedPin = employeePins[loginModalUser] || '0000';
+
+                if (expectedPin === pinInput) {
+                    // Si le code est bon ET que c'est le code par défaut (0000), forcer le changement
+                    if (expectedPin === '0000') {
+                        setIsChangingPin(true);
+                        setNewPinInput('');
+                        setConfirmNewPinInput('');
+                        setChangePinError('');
+                    } else {
+                        // Connexion réussie normale
+                        setEmployee(loginModalUser);
+                        localStorage.setItem('shiftsync_profile', loginModalUser);
+                        setLoginModalUser(null);
+                        showToast(`Bienvenue ${loginModalUser} !`);
+                    }
+                } else {
+                    setPinError(true);
+                    setPinInput('');
+                }
+            };
+
+            const handleChangePinSubmit = () => {
+                if (newPinInput.length !== 4 || confirmNewPinInput.length !== 4) {
+                    setChangePinError('Le code doit faire 4 chiffres.');
+                    return;
+                }
+                if (newPinInput !== confirmNewPinInput) {
+                    setChangePinError('Les deux codes ne correspondent pas.');
+                    setNewPinInput('');
+                    setConfirmNewPinInput('');
+                    return;
+                }
+                if (newPinInput === '0000') {
+                    setChangePinError('Veuillez choisir un code différent de 0000.');
+                    setNewPinInput('');
+                    setConfirmNewPinInput('');
+                    return;
+                }
+
+                // Enregistrer le nouveau PIN dans Firebase
+                db.collection('settings').doc('pins').set({
+                    [loginModalUser]: newPinInput
+                }, { merge: true }).then(() => {
+                    // Connexion automatique après changement
+                    setEmployee(loginModalUser);
+                    localStorage.setItem('shiftsync_profile', loginModalUser);
+                    setLoginModalUser(null);
+                    setIsChangingPin(false);
+                    showToast(`Code PIN enregistré, bienvenue ${loginModalUser} !`);
+                }).catch((error) => {
+                    setChangePinError("Erreur lors de l'enregistrement.");
+                    console.error("Firebase write error (pin):", error);
+                });
+            };
+
+            const handleLogout = () => {
+                setEmployee(null);
+                localStorage.removeItem('shiftsync_profile');
+            };
+
+            const submitActivePinChange = () => {
+                if (activeNewPin.length !== 4 || activeConfirmPin.length !== 4) {
+                    setActivePinError('Le code doit faire 4 chiffres.');
+                    return;
+                }
+                if (activeNewPin !== activeConfirmPin) {
+                    setActivePinError('Les deux codes ne correspondent pas.');
+                    setActiveNewPin('');
+                    setActiveConfirmPin('');
+                    return;
+                }
+
+                db.collection('settings').doc('pins').set({
+                    [employee]: activeNewPin
+                }, { merge: true }).then(() => {
+                    setIsChangingActivePin(false);
+                    showToast("Code PIN modifié avec succès ! 🔒");
+                }).catch((error) => {
+                    setActivePinError("Erreur lors de l'enregistrement.");
+                    console.error("Firebase write error (pin):", error);
+                });
             };
 
             const getShiftForDate = (dateObj, empName) => {
@@ -275,6 +408,42 @@
                 });
             };
 
+            const handleSetVacation = (type) => {
+                if (!vacationStart || !vacationEnd) {
+                    showToast("Sélectionnez les dates !"); return;
+                }
+                const start = new Date(vacationStart);
+                const end = new Date(vacationEnd);
+                if (end < start) {
+                    showToast("Dates invalides !"); return;
+                }
+
+                const batch = db.batch();
+                let loop = new Date(start);
+                
+                while (loop <= end) {
+                    const dateStr = generateDateString(loop);
+                    const docRef = db.collection('exceptions').doc(dateStr);
+                    if (type === 'add') {
+                        batch.set(docRef, { [employee]: "Congés 🌴" }, { merge: true });
+                    } else {
+                        // Utilisation de set + merge avec FieldValue.delete() pour éviter les erreurs not-found
+                        batch.set(docRef, { [employee]: firebase.firestore.FieldValue.delete() }, { merge: true });
+                    }
+                    const newDate = loop.setDate(loop.getDate() + 1);
+                    loop = new Date(newDate);
+                }
+
+                batch.commit().then(() => {
+                    showToast(type === 'add' ? "Congés enregistrés ! 🌴" : "Congés annulés !");
+                    setVacationStart('');
+                    setVacationEnd('');
+                }).catch(e => {
+                    showToast("Erreur lors de la sauvegarde.");
+                    console.error(e);
+                });
+            };
+
             const handleShare = (weekDates, totalHours) => {
                 const mondayStr = weekDates[0].date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
                 let text = `🗓️ *Mon planning ShiftSync (Sem. du ${mondayStr})*\n\n`;
@@ -301,7 +470,7 @@
                             
                             <div className="space-y-3 overflow-y-auto max-h-[50vh] pr-1">
                                 {EMPLOYEES.map((name) => (
-                                    <button key={name} onClick={() => handleSetEmployee(name)}
+                                    <button key={name} onClick={() => handleLoginAttempt(name)}
                                         className="w-full bg-slate-50 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 font-semibold py-3.5 px-5 rounded-2xl border-2 border-slate-100 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-800 transition-all active:scale-95 flex justify-between items-center"
                                     >
                                         <div className="flex items-center gap-3"><IconUser /><span className="text-lg">{name}</span></div>
@@ -310,6 +479,100 @@
                                 ))}
                             </div>
                         </div>
+
+                        {/* MODAL DE CONNEXION (CODE PIN) */}
+                        {loginModalUser && (
+                            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                                <div className="bg-white dark:bg-darkcard rounded-3xl w-full max-w-xs p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-center border border-slate-100 dark:border-slate-700">
+                                    <div className="mx-auto bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                                        <IconUser />
+                                    </div>
+                                    
+                                    {!isChangingPin ? (
+                                        // VUE DE CONNEXION NORMALE
+                                        <>
+                                            <h3 className="text-xl font-bold mb-1 dark:text-white">Code secret</h3>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                                                Identifiez-vous en tant que <strong>{loginModalUser}</strong>
+                                                <br/>
+                                                <span className="text-xs italic">(Code par défaut: 0000)</span>
+                                            </p>
+                                            
+                                            <input 
+                                                type="password" 
+                                                pattern="[0-9]*"
+                                                inputMode="numeric"
+                                                maxLength="4"
+                                                value={pinInput}
+                                                onChange={(e) => { setPinInput(e.target.value); setPinError(false); }}
+                                                className={`w-full text-center text-3xl tracking-[0.5em] bg-slate-50 dark:bg-slate-900 border ${pinError ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'} rounded-xl p-4 font-bold text-slate-800 dark:text-white mb-2 focus:ring-2 focus:ring-blue-500 outline-none transition-colors`}
+                                                placeholder="••••"
+                                            />
+                                            {pinError && <p className="text-red-500 text-xs font-bold mb-4 animate-bounce">Code incorrect</p>}
+                                            {!pinError && <div className="h-4 mb-4"></div>}
+
+                                            <div className="flex gap-3 mt-2">
+                                                <button onClick={() => setLoginModalUser(null)} className="flex-1 py-3 rounded-xl font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">
+                                                    Annuler
+                                                </button>
+                                                <button onClick={handlePinSubmit} className="flex-1 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                                                    Valider
+                                                </button>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        // VUE CHANGEMENT DE PIN OBLIGATOIRE
+                                        <>
+                                            <h3 className="text-xl font-bold mb-1 dark:text-white">Nouveau code</h3>
+                                            <p className="text-sm text-amber-600 dark:text-amber-500 font-medium mb-6">
+                                                Première connexion ! Veuillez choisir un code PIN à 4 chiffres.
+                                            </p>
+                                            
+                                            <div className="space-y-3 mb-4">
+                                                <div>
+                                                    <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase block text-left mb-1">Nouveau code</label>
+                                                    <input 
+                                                        type="password" 
+                                                        pattern="[0-9]*"
+                                                        inputMode="numeric"
+                                                        maxLength="4"
+                                                        value={newPinInput}
+                                                        onChange={(e) => { setNewPinInput(e.target.value); setChangePinError(''); }}
+                                                        className="w-full text-center text-2xl tracking-[0.3em] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                                        placeholder="••••"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase block text-left mb-1">Confirmer</label>
+                                                    <input 
+                                                        type="password" 
+                                                        pattern="[0-9]*"
+                                                        inputMode="numeric"
+                                                        maxLength="4"
+                                                        value={confirmNewPinInput}
+                                                        onChange={(e) => { setConfirmNewPinInput(e.target.value); setChangePinError(''); }}
+                                                        className="w-full text-center text-2xl tracking-[0.3em] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                                        placeholder="••••"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {changePinError && <p className="text-red-500 text-xs font-bold mb-4 animate-pulse">{changePinError}</p>}
+                                            {!changePinError && <div className="h-4 mb-4"></div>}
+
+                                            <div className="flex gap-3 mt-2">
+                                                <button onClick={() => { setIsChangingPin(false); setLoginModalUser(null); }} className="flex-1 py-3 rounded-xl font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">
+                                                    Annuler
+                                                </button>
+                                                <button onClick={handleChangePinSubmit} className="flex-1 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                                                    Enregistrer
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 );
             }
@@ -352,7 +615,10 @@
                                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="bg-white/20 p-2.5 rounded-full hover:bg-white/30 transition backdrop-blur-sm active:scale-90">
                                     {isDarkMode ? <IconSun /> : <IconMoon />}
                                 </button>
-                                <button onClick={() => handleSetEmployee(null)} className="bg-white/20 p-2.5 rounded-full hover:bg-white/30 transition backdrop-blur-sm active:scale-90 text-red-100 hover:text-white">
+                                <button onClick={() => { setIsChangingActivePin(true); setActiveNewPin(''); setActiveConfirmPin(''); setActivePinError(''); }} className="bg-white/20 p-2.5 rounded-full hover:bg-white/30 transition backdrop-blur-sm active:scale-90 text-blue-100 hover:text-white" title="Modifier mon code PIN">
+                                    <IconKey />
+                                </button>
+                                <button onClick={handleLogout} className="bg-white/20 p-2.5 rounded-full hover:bg-white/30 transition backdrop-blur-sm active:scale-90 text-red-100 hover:text-white">
                                     <IconLogOut />
                                 </button>
                             </div>
@@ -362,27 +628,26 @@
                     <main className="max-w-md mx-auto px-4 flex-1 w-full mt-6">
                         
                         {/* NAVIGATION TEMPORELLE */}
-                        <div className="bg-white dark:bg-darkcard border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm p-2 mb-6 flex justify-between items-center">
-                            <button onClick={() => setCurrentViewDate(new Date(currentViewDate.setDate(currentViewDate.getDate() - (activeTab === 'me' ? 7 : 1))))} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-xl transition active:scale-90">
-                                <IconChevronLeft />
-                            </button>
-                            
-                            <button onClick={() => setCurrentViewDate(new Date())} className="flex flex-col items-center px-4 py-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition active:scale-95">
-                                <span className="text-xs font-semibold uppercase text-slate-400 dark:text-slate-500 tracking-wider">
-                                    {activeTab === 'me' ? 'Semaine du' : 'Aujourd\'hui'}
-                                </span>
-                                <span className="font-bold text-slate-800 dark:text-white text-lg">
-                                    {activeTab === 'me' 
-                                        ? currentMonday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
-                                        : currentViewDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
-                                    }
-                                </span>
-                            </button>
-                            
-                            <button onClick={() => setCurrentViewDate(new Date(currentViewDate.setDate(currentViewDate.getDate() + (activeTab === 'me' ? 7 : 1))))} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-xl transition active:scale-90">
-                                <IconChevronRight />
-                            </button>
-                        </div>
+                        {activeTab !== 'vacances' && (
+                            <div className="bg-white dark:bg-darkcard border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm p-2 mb-6 flex justify-between items-center">
+                                <button onClick={() => setCurrentViewDate(new Date(currentViewDate.setDate(currentViewDate.getDate() - 7)))} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-xl transition active:scale-90">
+                                    <IconChevronLeft />
+                                </button>
+                                
+                                <button onClick={() => setCurrentViewDate(new Date())} className="flex flex-col items-center px-4 py-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition active:scale-95">
+                                    <span className="text-xs font-semibold uppercase text-slate-400 dark:text-slate-500 tracking-wider">
+                                        Semaine du
+                                    </span>
+                                    <span className="font-bold text-slate-800 dark:text-white text-lg">
+                                        {currentMonday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                                    </span>
+                                </button>
+                                
+                                <button onClick={() => setCurrentViewDate(new Date(currentViewDate.setDate(currentViewDate.getDate() + 7)))} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-xl transition active:scale-90">
+                                    <IconChevronRight />
+                                </button>
+                            </div>
+                        )}
 
                         {/* ONGLET 1 : MON PLANNING */}
                         {activeTab === 'me' && (
@@ -398,13 +663,13 @@
 
                                 {weekDates.map(({ dayName, date, dateString, horaire }) => {
                                     const isToday = dateString === todayStr;
-                                    const isRepos = horaire.toLowerCase() === 'repos';
+                                    const isOff = horaire.toLowerCase().includes('repos') || horaire.toLowerCase().includes('cong');
                                     const hasException = exceptions[dateString] && exceptions[dateString][employee];
 
                                     return (
                                         <div key={dayName} className={`relative overflow-hidden rounded-2xl p-5 border ${
                                                 isToday ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 shadow-md ring-2 ring-blue-500/50' 
-                                                : isRepos ? 'bg-slate-50 dark:bg-darkbg border-slate-200 dark:border-slate-800 opacity-80'
+                                                : isOff ? 'bg-slate-50 dark:bg-darkbg border-slate-200 dark:border-slate-800 opacity-80'
                                                 : 'bg-white dark:bg-darkcard border-slate-100 dark:border-slate-700 shadow-sm'
                                             } transition-all`}
                                         >
@@ -431,11 +696,11 @@
 
                                                 <div className="flex items-center gap-2">
                                                     <div className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold shadow-sm ${
-                                                        isRepos ? 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400' 
+                                                        isOff ? 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400' 
                                                         : isToday ? 'bg-blue-600 text-white shadow-blue-200 dark:shadow-none'
                                                         : 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300'
                                                     }`}>
-                                                        {isRepos ? <IconCoffee /> : <IconClock />}
+                                                        {isOff ? <IconCoffee /> : <IconClock />}
                                                         {horaire}
                                                     </div>
                                                     
@@ -453,11 +718,32 @@
                         {/* ONGLET 2 : VUE EQUIPE */}
                         {activeTab === 'team' && (
                             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                <h2 className="text-lg font-bold text-slate-800 dark:text-white px-2">L'équipe du jour</h2>
+                                
+                                {/* SELECTEUR DE JOUR */}
+                                <div className="flex justify-between items-center bg-white dark:bg-darkcard p-1.5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-x-auto">
+                                    {DAYS_OF_WEEK.map((dayName, index) => {
+                                        const dateObj = new Date(currentMonday);
+                                        dateObj.setDate(currentMonday.getDate() + index);
+                                        const isSelected = generateDateString(dateObj) === generateDateString(currentViewDate);
+                                        const isTodayStr = generateDateString(dateObj) === generateDateString(new Date());
+                                        return (
+                                            <button
+                                                key={dayName}
+                                                onClick={() => setCurrentViewDate(dateObj)}
+                                                className={`flex flex-col items-center justify-center w-11 h-14 rounded-xl transition ${isSelected ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                                            >
+                                                <span className="text-[10px] uppercase font-bold">{dayName.substring(0,3)}</span>
+                                                <span className={`text-sm font-bold ${isSelected ? 'text-white' : isTodayStr ? 'text-blue-600 dark:text-blue-400' : 'text-slate-800 dark:text-slate-200'}`}>{dateObj.getDate()}</span>
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-white px-2 mt-4">L'équipe du jour</h2>
                                 
                                 {EMPLOYEES.map(empName => {
                                     const shift = getShiftForDate(currentViewDate, empName);
-                                    const isRepos = shift.toLowerCase() === 'repos';
+                                    const isOff = shift.toLowerCase().includes('repos') || shift.toLowerCase().includes('cong');
                                     const dateStr = generateDateString(currentViewDate);
                                     const hasException = exceptions[dateStr] && exceptions[dateStr][empName];
                                     const isMe = empName === employee;
@@ -465,7 +751,7 @@
                                     return (
                                         <div key={empName} className={`flex items-center justify-between p-4 rounded-2xl border ${isMe ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-darkcard border-slate-100 dark:border-slate-800'}`}>
                                             <div className="flex items-center gap-4">
-                                                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${isRepos ? 'bg-slate-100 dark:bg-slate-800 text-slate-400' : isMe ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300' : 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300'}`}>
+                                                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${isOff ? 'bg-slate-100 dark:bg-slate-800 text-slate-400' : isMe ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300' : 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300'}`}>
                                                     {empName.charAt(0)}
                                                 </div>
                                                 <div>
@@ -475,7 +761,7 @@
                                                     {hasException && <div className="text-xs text-amber-500 font-medium mt-0.5">Horaire modifié</div>}
                                                 </div>
                                             </div>
-                                            <div className={`px-3 py-1.5 rounded-lg font-bold text-sm ${isRepos ? 'bg-slate-100 dark:bg-slate-800 text-slate-500' : 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900'}`}>
+                                            <div className={`px-3 py-1.5 rounded-lg font-bold text-sm ${isOff ? 'bg-slate-100 dark:bg-slate-800 text-slate-500' : 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900'}`}>
                                                 {shift}
                                             </div>
                                         </div>
@@ -483,18 +769,57 @@
                                 })}
                             </div>
                         )}
+
+                        {/* ONGLET 3 : VACANCES */}
+                        {activeTab === 'vacances' && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                <div className="bg-white dark:bg-darkcard p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mb-4">
+                                        <IconPlane />
+                                    </div>
+                                    <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Poser mes congés</h2>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                                        Sélectionnez une période. Les jours choisis apparaîtront comme "Congés 🌴" pour vous et votre équipe.
+                                    </p>
+
+                                    <div className="space-y-4 mb-6">
+                                        <div>
+                                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1 block">Du (inclus)</label>
+                                            <input type="date" value={vacationStart} onChange={e => setVacationStart(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1 block">Au (inclus)</label>
+                                            <input type="date" value={vacationEnd} onChange={e => setVacationEnd(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col gap-3">
+                                        <button onClick={() => handleSetVacation('add')} className="w-full py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition">
+                                            Enregistrer ces congés
+                                        </button>
+                                        <button onClick={() => handleSetVacation('remove')} className="w-full py-3 rounded-xl font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 transition">
+                                            Retirer les congés sur cette période
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </main>
 
                     {/* BOTTOM NAVIGATION */}
                     <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-darkcard border-t border-slate-200 dark:border-slate-800 pb-safe pt-2 px-6 pb-4 z-20">
-                        <div className="max-w-md mx-auto flex justify-around">
-                            <button onClick={() => setActiveTab('me')} className={`flex flex-col items-center p-2 rounded-xl w-24 transition ${activeTab === 'me' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+                        <div className="max-w-md mx-auto flex justify-between px-2">
+                            <button onClick={() => setActiveTab('me')} className={`flex flex-col items-center p-2 rounded-xl w-20 transition ${activeTab === 'me' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
                                 <IconUser />
                                 <span className="text-[10px] font-bold mt-1 uppercase">Moi</span>
                             </button>
-                            <button onClick={() => setActiveTab('team')} className={`flex flex-col items-center p-2 rounded-xl w-24 transition ${activeTab === 'team' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+                            <button onClick={() => setActiveTab('team')} className={`flex flex-col items-center p-2 rounded-xl w-20 transition ${activeTab === 'team' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
                                 <IconUsers />
                                 <span className="text-[10px] font-bold mt-1 uppercase">L'Équipe</span>
+                            </button>
+                            <button onClick={() => setActiveTab('vacances')} className={`flex flex-col items-center p-2 rounded-xl w-20 transition ${activeTab === 'vacances' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+                                <IconPlane />
+                                <span className="text-[10px] font-bold mt-1 uppercase">Congés</span>
                             </button>
                         </div>
                     </div>
@@ -530,6 +855,62 @@
                                         Rétablir l'horaire normal
                                     </button>
                                 )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* MODAL CHANGEMENT DE PIN VOLONTAIRE */}
+                    {isChangingActivePin && (
+                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                            <div className="bg-white dark:bg-darkcard rounded-3xl w-full max-w-xs p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-center border border-slate-100 dark:border-slate-700">
+                                <div className="mx-auto bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                                    <IconKey />
+                                </div>
+                                <h3 className="text-xl font-bold mb-1 dark:text-white">Modifier mon PIN</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                                    Choisissez un nouveau code à 4 chiffres.
+                                </p>
+                                
+                                <div className="space-y-3 mb-4">
+                                    <div>
+                                        <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase block text-left mb-1">Nouveau code</label>
+                                        <input 
+                                            type="password" 
+                                            pattern="[0-9]*"
+                                            inputMode="numeric"
+                                            maxLength="4"
+                                            value={activeNewPin}
+                                            onChange={(e) => { setActiveNewPin(e.target.value); setActivePinError(''); }}
+                                            className="w-full text-center text-2xl tracking-[0.3em] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                            placeholder="••••"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase block text-left mb-1">Confirmer</label>
+                                        <input 
+                                            type="password" 
+                                            pattern="[0-9]*"
+                                            inputMode="numeric"
+                                            maxLength="4"
+                                            value={activeConfirmPin}
+                                            onChange={(e) => { setActiveConfirmPin(e.target.value); setActivePinError(''); }}
+                                            className="w-full text-center text-2xl tracking-[0.3em] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                            placeholder="••••"
+                                        />
+                                    </div>
+                                </div>
+
+                                {activePinError && <p className="text-red-500 text-xs font-bold mb-4 animate-pulse">{activePinError}</p>}
+                                {!activePinError && <div className="h-4 mb-4"></div>}
+
+                                <div className="flex gap-3 mt-2">
+                                    <button onClick={() => setIsChangingActivePin(false)} className="flex-1 py-3 rounded-xl font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">
+                                        Annuler
+                                    </button>
+                                    <button onClick={submitActivePinChange} className="flex-1 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                                        Enregistrer
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
