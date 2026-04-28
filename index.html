@@ -27,6 +27,10 @@
             }
         }
     </script>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -62,6 +66,21 @@
         };
         const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
         document.getElementById('manifest-link').href = URL.createObjectURL(blob);
+
+        // INITIALISATION DE FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyBHfCS2EnbmDHtWe_oVzdy0xDfnq1YNqtY",
+            authDomain: "shiftsync-5ebda.firebaseapp.com",
+            projectId: "shiftsync-5ebda",
+            storageBucket: "shiftsync-5ebda.firebasestorage.app",
+            messagingSenderId: "17662196576",
+            appId: "1:17662196576:web:a6d098f307ea708f17bc05"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
     </script>
 
     <script type="text/babel">
@@ -84,35 +103,35 @@
         const EMPLOYEES = ['Tom', 'Anthony', 'Stéphanie', 'Raphaël', 'Max', 'Jérôme', 'Nicolas', 'Jean-Benoît'];
         const DAYS_OF_WEEK = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
 
-        // 1. Cycle de 3 semaines (Équipe initiale)
+        // 1. Cycle de 3 semaines
         const CYCLE_3_WEEKS = [
-            { // Semaine 1
+            {
                 Tom: { lundi: "repos", mardi: "12h - 19h30", mercredi: "9h30 - 17h", jeudi: "11h - 18h30", vendredi: "12h - 19h30", samedi: "9h30 - 17h", dimanche: "repos" },
                 Anthony: { lundi: "9h30 - 17h", mardi: "repos", mercredi: "12h - 19h30", jeudi: "12h - 19h30", vendredi: "9h30 - 17h", samedi: "11h - 18h30", dimanche: "repos" },
                 Stéphanie: { lundi: "12h - 19h30", mardi: "9h30 - 17h", mercredi: "repos", jeudi: "9h30 - 17h", vendredi: "11h - 18h30", samedi: "12h - 19h30", dimanche: "repos" }
             },
-            { // Semaine 2
+            {
                 Tom: { lundi: "repos", mardi: "12h - 19h30", mercredi: "9h30 - 17h", jeudi: "12h - 19h30", vendredi: "9h30 - 17h", samedi: "11h - 18h30", dimanche: "repos" },
                 Anthony: { lundi: "9h30 - 17h", mardi: "repos", mercredi: "12h - 19h30", jeudi: "9h30 - 17h", vendredi: "11h - 18h30", samedi: "12h - 19h30", dimanche: "repos" },
                 Stéphanie: { lundi: "12h - 19h30", mardi: "9h30 - 17h", mercredi: "repos", jeudi: "11h - 18h30", vendredi: "12h - 19h30", samedi: "9h30 - 17h", dimanche: "repos" }
             },
-            { // Semaine 3
+            {
                 Tom: { lundi: "repos", mardi: "12h - 19h30", mercredi: "9h30 - 17h", jeudi: "9h30 - 17h", vendredi: "11h - 18h30", samedi: "12h - 19h30", dimanche: "repos" },
                 Anthony: { lundi: "9h30 - 17h", mardi: "repos", mercredi: "12h - 19h30", jeudi: "11h - 18h30", vendredi: "12h - 19h30", samedi: "9h30 - 17h", dimanche: "repos" },
                 Stéphanie: { lundi: "12h - 19h30", mardi: "9h30 - 17h", mercredi: "repos", jeudi: "12h - 19h30", vendredi: "9h30 - 17h", samedi: "11h - 18h30", dimanche: "repos" }
             }
         ];
 
-        // 2. Cycle de 2 semaines (Nouvelle équipe)
+        // 2. Cycle de 2 semaines
         const CYCLE_2_WEEKS = [
-            { // Semaine A (Ex: Semaine du 27 Avril)
+            {
                 Raphaël: { lundi: "8h - 15h30", mardi: "8h30 - 16h", mercredi: "12h30 - 20h", jeudi: "repos", vendredi: "13h - 20h30", samedi: "10h30 - 19h", dimanche: "repos" },
                 Max: { lundi: "13h - 20h30", mardi: "repos", mercredi: "8h - 15h30", jeudi: "13h - 20h30", vendredi: "8h30 - 16h", samedi: "13h - 20h30", dimanche: "repos" },
                 Jérôme: { lundi: "8h30 - 16h", mardi: "12h30 - 20h", mercredi: "10h30 - 19h", jeudi: "8h30 - 16h", vendredi: "repos", samedi: "8h30 - 16h", dimanche: "repos" },
                 Nicolas: { lundi: "12h30 - 20h", mardi: "8h - 15h30", mercredi: "repos", jeudi: "8h - 15h30", vendredi: "12h30 - 20h", samedi: "12h30 - 20h", dimanche: "repos" },
                 "Jean-Benoît": { lundi: "repos", mardi: "13h - 20h30", mercredi: "8h30 - 16h", jeudi: "12h30 - 20h", vendredi: "8h - 15h30", samedi: "8h - 15h30", dimanche: "repos" }
             },
-            { // Semaine B (Ex: Semaine du 20 Avril - "Cette semaine")
+            {
                 Raphaël: { lundi: "8h - 15h30", mardi: "8h30 - 16h", mercredi: "12h30 - 20h", jeudi: "repos", vendredi: "13h - 20h30", samedi: "10h30 - 19h", dimanche: "repos" },
                 Max: { lundi: "13h - 20h30", mardi: "repos", mercredi: "8h - 15h30", jeudi: "13h - 20h30", vendredi: "8h30 - 16h", samedi: "8h - 15h30", dimanche: "repos" },
                 Jérôme: { lundi: "8h30 - 16h", mardi: "12h30 - 20h", mercredi: "10h30 - 19h", jeudi: "8h30 - 16h", vendredi: "repos", samedi: "13h - 20h30", dimanche: "repos" },
@@ -121,14 +140,14 @@
             }
         ];
 
-        // 3. Fusion mathématique (Plus Petit Commun Multiple = Cycle de 6 semaines)
+        // 3. Fusion = Cycle de 6 semaines
         const SCHEDULE_CYCLE = [
-            { ...CYCLE_3_WEEKS[0], ...CYCLE_2_WEEKS[0] }, // Semaine 1
-            { ...CYCLE_3_WEEKS[1], ...CYCLE_2_WEEKS[1] }, // Semaine 2
-            { ...CYCLE_3_WEEKS[2], ...CYCLE_2_WEEKS[0] }, // Semaine 3
-            { ...CYCLE_3_WEEKS[0], ...CYCLE_2_WEEKS[1] }, // Semaine 4
-            { ...CYCLE_3_WEEKS[1], ...CYCLE_2_WEEKS[0] }, // Semaine 5
-            { ...CYCLE_3_WEEKS[2], ...CYCLE_2_WEEKS[1] }, // Semaine 6
+            { ...CYCLE_3_WEEKS[0], ...CYCLE_2_WEEKS[0] },
+            { ...CYCLE_3_WEEKS[1], ...CYCLE_2_WEEKS[1] },
+            { ...CYCLE_3_WEEKS[2], ...CYCLE_2_WEEKS[0] },
+            { ...CYCLE_3_WEEKS[0], ...CYCLE_2_WEEKS[1] },
+            { ...CYCLE_3_WEEKS[1], ...CYCLE_2_WEEKS[0] },
+            { ...CYCLE_3_WEEKS[2], ...CYCLE_2_WEEKS[1] },
         ];
 
         // --- UTILITAIRES ---
@@ -146,7 +165,7 @@
             const diffTime = targetMonday.getTime() - refDate.getTime();
             const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
             const diffWeeks = Math.floor(diffDays / 7);
-            return ((diffWeeks % 6) + 6) % 6; // On passe le modulo à 6
+            return ((diffWeeks % 6) + 6) % 6; 
         };
 
         const generateDateString = (dateObj) => {
@@ -180,7 +199,8 @@
                 return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             });
 
-            const [exceptions, setExceptions] = useState(() => JSON.parse(localStorage.getItem('shiftsync_exceptions') || '{}'));
+            // Exceptions gérées par Firebase (synchronisation temps réel)
+            const [exceptions, setExceptions] = useState({});
             const [toast, setToast] = useState(null);
             const [editModal, setEditModal] = useState(null);
 
@@ -190,9 +210,20 @@
                 localStorage.setItem('shiftsync_theme', isDarkMode ? 'dark' : 'light');
             }, [isDarkMode]);
 
+            // Ecoute des modifications Firebase
             useEffect(() => {
-                localStorage.setItem('shiftsync_exceptions', JSON.stringify(exceptions));
-            }, [exceptions]);
+                const unsubscribe = db.collection('exceptions').onSnapshot((snapshot) => {
+                    const newExceptions = {};
+                    snapshot.forEach((doc) => {
+                        newExceptions[doc.id] = doc.data();
+                    });
+                    setExceptions(newExceptions);
+                }, (error) => {
+                    console.error("Erreur Firebase:", error);
+                });
+
+                return () => unsubscribe(); // Nettoyage
+            }, []);
 
             const showToast = (msg) => {
                 setToast(msg);
@@ -217,14 +248,31 @@
             };
 
             const saveException = (dateStr, empName, newShift) => {
-                setExceptions(prev => {
-                    const updated = { ...prev };
-                    if (!updated[dateStr]) updated[dateStr] = {};
-                    updated[dateStr][empName] = newShift;
-                    return updated;
+                // Enregistrement dans la base de données Firebase
+                db.collection('exceptions').doc(dateStr).set({
+                    [empName]: newShift
+                }, { merge: true }).then(() => {
+                    setEditModal(null);
+                    showToast("Horaire synchronisé ! ☁️");
+                }).catch((error) => {
+                    showToast("Erreur de sauvegarde...");
+                    console.error("Firebase write error:", error);
                 });
-                setEditModal(null);
-                showToast("Horaire mis à jour !");
+            };
+
+            const resetException = (dateStr, empName) => {
+                // Suppression de la modification dans Firebase
+                db.collection('exceptions').doc(dateStr).update({
+                    [empName]: firebase.firestore.FieldValue.delete()
+                }).then(() => {
+                    setEditModal(null);
+                    showToast("Horaire réinitialisé ! ☁️");
+                }).catch((error) => {
+                    // Si le document est déjà vide, on peut le supprimer totalement
+                    if(error.code === 'not-found') {
+                        setEditModal(null);
+                    }
+                });
             };
 
             const handleShare = (weekDates, totalHours) => {
@@ -478,13 +526,7 @@
                                     </button>
                                 </div>
                                 {exceptions[editModal.dateString] && exceptions[editModal.dateString][editModal.empName] && (
-                                    <button onClick={() => {
-                                        setExceptions(prev => {
-                                            const up = {...prev}; delete up[editModal.dateString][editModal.empName]; return up;
-                                        });
-                                        setEditModal(null);
-                                        showToast("Horaire réinitialisé !");
-                                    }} className="w-full mt-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
+                                    <button onClick={() => resetException(editModal.dateString, editModal.empName)} className="w-full mt-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
                                         Rétablir l'horaire normal
                                     </button>
                                 )}
