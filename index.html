@@ -9,10 +9,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ShiftSync">
     
-    <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300c6ff'/%3E%3Cstop offset='100%25' stop-color='%230072ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='128' fill='url(%23grad)'/%3E%3Ctext x='50%25' y='53%25' font-family='-apple-system, sans-serif' font-weight='900' font-size='340' fill='white' text-anchor='middle' dominant-baseline='central' letter-spacing='-10'%3ES%3C/text%3E%3C/svg%3E">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300c6ff'/%3E%3Cstop offset='100%25' stop-color='%230072ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='128' fill='url(%23grad)'/%3E%3Ctext x='50%25' y='53%25' font-family='-apple-system, sans-serif' font-weight='900' font-size='340' fill='white' text-anchor='middle' dominant-baseline='central' letter-spacing='-10'%3ES%3C/text%3E%3C/svg%3E">
-    <link id="manifest-link" rel="manifest" href="">
-
+    <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23a18cd1'/%3E%3Cstop offset='100%25' stop-color='%23fbc2eb'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='128' fill='url(%23grad)'/%3E%3Ctext x='50%25' y='53%25' font-family='-apple-system, sans-serif' font-weight='900' font-size='340' fill='white' text-anchor='middle' dominant-baseline='central' letter-spacing='-10'%3ES%3C/text%3E%3C/svg%3E">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -20,8 +18,9 @@
             theme: {
                 extend: {
                     colors: {
-                        darkbg: '#0f172a',
-                        darkcard: '#1e293b'
+                        darkbg: '#0a0f1c',
+                        glasswhite: 'rgba(255, 255, 255, 0.45)',
+                        glassdark: 'rgba(17, 25, 40, 0.7)',
                     }
                 }
             }
@@ -40,34 +39,63 @@
             -webkit-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: #f3f4f6;
         }
+
+        .bg-liquid {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2;
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+        }
+        .dark .bg-liquid { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); }
+
+        .orb { position: fixed; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.5; animation: float 15s ease-in-out infinite alternate; }
+        .orb-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #ff00ea; }
+        .orb-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #00eaff; animation-duration: 20s; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 60px) scale(1.1); } }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+        .dark .glass { background: rgba(17, 25, 40, 0.65); border: 1px solid rgba(255, 255, 255, 0.15); }
+        
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+        }
+        .dark .glass-strong { background: rgba(15, 23, 42, 0.9); }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.95) !important;
+            border: 2px solid #a18cd1 !important;
+            color: #1e293b !important;
+        }
+        .dark .glass-input {
+            background: rgba(30, 41, 59, 0.98) !important;
+            border: 2px solid #6366f1 !important;
+            color: #f8fafc !important;
+        }
+        
         .safe-top { padding-top: env(safe-area-inset-top); }
         .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-        * { transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="bg-slate-100 dark:bg-darkbg text-slate-900 dark:text-slate-100 transition-colors duration-300">
+<body class="text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen">
+    <div class="bg-liquid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
     <div id="root"></div>
 
     <script>
-        const manifest = {
-            name: "ShiftSync",
-            short_name: "ShiftSync",
-            display: "standalone",
-            background_color: "#f8fafc",
-            theme_color: "#2563EB",
-            icons: [{
-                src: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300c6ff'/%3E%3Cstop offset='100%25' stop-color='%230072ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='128' fill='url(%23grad)'/%3E%3Ctext x='50%25' y='53%25' font-family='-apple-system, sans-serif' font-weight='900' font-size='340' fill='white' text-anchor='middle' dominant-baseline='central' letter-spacing='-10'%3ES%3C/text%3E%3C/svg%3E",
-                sizes: "512x512",
-                type: "image/svg+xml",
-                purpose: "any maskable"
-            }]
-        };
-        const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-        document.getElementById('manifest-link').href = URL.createObjectURL(blob);
-
-        // INITIALISATION DE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBHfCS2EnbmDHtWe_oVzdy0xDfnq1YNqtY",
             authDomain: "shiftsync-5ebda.firebaseapp.com",
@@ -76,39 +104,29 @@
             messagingSenderId: "17662196576",
             appId: "1:17662196576:web:a6d098f307ea708f17bc05"
         };
-        
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
     </script>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- ICONES ---
         const IconUser = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
         const IconUsers = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
         const IconChevronRight = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>;
         const IconChevronLeft = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>;
         const IconLogOut = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>;
-        const IconClock = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
-        const IconCoffee = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>;
-        const IconSun = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>;
-        const IconMoon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>;
-        const IconShare = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>;
-        const IconEdit = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>;
         const IconKey = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>;
         const IconPlane = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.7l-1.2 3.3c-.2.5.1 1 .6 1.1l7.3 1.9-4.7 4.7-2.6-.4c-.4-.1-.8.1-1 .5l-1.1 1.6c-.2.4.1.9.5 1l3.7 1 1 3.7c.1.4.6.7 1 .5l1.6-1.1c.4-.2.6-.6.5-1l-.4-2.6 4.7-4.7 1.9 7.3c.1.5.6.8 1.1.6l3.3-1.2c.5-.2.8-.6.7-1.1z"></path></svg>;
         const IconMessage = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>;
         const IconSend = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>;
+        const IconSun = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>;
+        const IconMoon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>;
+        const IconEdit = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>;
 
-        // --- DONNÉES ---
         const EMPLOYEES = ['Tom', 'Anthony', 'Stéphanie', 'Raphaël', 'Max', 'Jérôme', 'Nicolas', 'Jean-Benoît'];
-        
         const DAYS_OF_WEEK = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
 
-        // 1. Cycle de 3 semaines
         const CYCLE_3_WEEKS = [
             {
                 Tom: { lundi: "repos", mardi: "12h - 19h30", mercredi: "9h30 - 17h", jeudi: "11h - 18h30", vendredi: "12h - 19h30", samedi: "9h30 - 17h", dimanche: "repos" },
@@ -127,7 +145,6 @@
             }
         ];
 
-        // 2. Cycle de 2 semaines
         const CYCLE_2_WEEKS = [
             {
                 Raphaël: { lundi: "8h - 15h30", mardi: "8h30 - 16h", mercredi: "12h30 - 20h", jeudi: "repos", vendredi: "13h - 20h30", samedi: "10h30 - 19h", dimanche: "repos" },
@@ -145,7 +162,6 @@
             }
         ];
 
-        // 3. Fusion = Cycle de 6 semaines
         const SCHEDULE_CYCLE = [
             { ...CYCLE_3_WEEKS[0], ...CYCLE_2_WEEKS[0] },
             { ...CYCLE_3_WEEKS[1], ...CYCLE_2_WEEKS[1] },
@@ -155,7 +171,6 @@
             { ...CYCLE_3_WEEKS[2], ...CYCLE_2_WEEKS[1] },
         ];
 
-        // --- UTILITAIRES ---
         const getMonday = (d) => {
             const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
             const day = date.getUTCDay();
@@ -178,65 +193,46 @@
         };
 
         const parseHours = (shiftStr) => {
-            if (!shiftStr || shiftStr.toLowerCase().includes('repos') || shiftStr.toLowerCase().includes('cong') || shiftStr.toLowerCase() === 'absent') return 0;
+            if (!shiftStr || shiftStr.toLowerCase().includes('repos') || shiftStr.toLowerCase().includes('cong')) return 0;
             const regex = /(\d{1,2})h(?:(\d{2}))?\s*(?:-|à)\s*(\d{1,2})h(?:(\d{2}))?/i;
             const match = shiftStr.match(regex);
             if(match) {
-                const startH = parseInt(match[1]);
-                const startM = match[2] ? parseInt(match[2]) : 0;
-                const endH = parseInt(match[3]);
-                const endM = match[4] ? parseInt(match[4]) : 0;
-                let duration = (endH + endM/60) - (startH + startM/60);
-                return duration > 0 ? duration : 0;
+                const startH = parseInt(match[1]), startM = match[2] ? parseInt(match[2]) : 0;
+                const endH = parseInt(match[3]), endM = match[4] ? parseInt(match[4]) : 0;
+                return (endH + endM/60) - (startH + startM/60);
             }
             return 0;
         };
 
-        // --- COMPOSANT PRINCIPAL ---
         function App() {
             const [employee, setEmployee] = useState(localStorage.getItem('shiftsync_profile') || null);
             const [activeTab, setActiveTab] = useState('me');
             const [currentViewDate, setCurrentViewDate] = useState(new Date());
-            
-            // États pour le système de connexion par PIN
             const [loginModalUser, setLoginModalUser] = useState(null);
             const [pinInput, setPinInput] = useState('');
             const [pinError, setPinError] = useState(false);
-            
-            // Nouveaux états pour le changement de PIN
             const [isChangingPin, setIsChangingPin] = useState(false);
             const [newPinInput, setNewPinInput] = useState('');
             const [confirmNewPinInput, setConfirmNewPinInput] = useState('');
             const [changePinError, setChangePinError] = useState('');
-
-            // États pour le changement de PIN volontaire (quand déjà connecté)
             const [isChangingActivePin, setIsChangingActivePin] = useState(false);
             const [activeNewPin, setActiveNewPin] = useState('');
             const [activeConfirmPin, setActiveConfirmPin] = useState('');
             const [activePinError, setActivePinError] = useState('');
-
-            // Nouveaux états pour les congés
             const [vacationStart, setVacationStart] = useState('');
             const [vacationEnd, setVacationEnd] = useState('');
-
-            // États pour le Chat
             const [chatMessages, setChatMessages] = useState([]);
             const [newChatMessage, setNewChatMessage] = useState('');
-            const [hasUnreadChat, setHasUnreadChat] = useState(false); // NOUVEAU : État de la pastille
-            const messagesEndRef = useRef(null);
-
+            const [hasUnreadChat, setHasUnreadChat] = useState(false); 
             const [isDarkMode, setIsDarkMode] = useState(() => {
                 const saved = localStorage.getItem('shiftsync_theme');
-                if (saved) return saved === 'dark';
-                return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                return saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
             });
-
-            // Exceptions gérées par Firebase (synchronisation temps réel)
             const [exceptions, setExceptions] = useState({});
-            // Ajout de l'état pour les PINs depuis Firebase
             const [employeePins, setEmployeePins] = useState({});
             const [toast, setToast] = useState(null);
             const [editModal, setEditModal] = useState(null);
+            const messagesEndRef = useRef(null);
 
             useEffect(() => {
                 if (isDarkMode) document.documentElement.classList.add('dark');
@@ -244,412 +240,120 @@
                 localStorage.setItem('shiftsync_theme', isDarkMode ? 'dark' : 'light');
             }, [isDarkMode]);
 
-            // Ecoute des modifications Firebase (Exceptions + PINs)
             useEffect(() => {
-                // Écoute des exceptions
-                const unsubscribeExceptions = db.collection('exceptions').onSnapshot((snapshot) => {
-                    const newExceptions = {};
-                    snapshot.forEach((doc) => {
-                        newExceptions[doc.id] = doc.data();
-                    });
-                    setExceptions(newExceptions);
-                }, (error) => {
-                    console.error("Erreur Firebase (exceptions):", error);
+                const unsubEx = db.collection('exceptions').onSnapshot(snap => {
+                    const obj = {}; snap.forEach(doc => obj[doc.id] = doc.data());
+                    setExceptions(obj);
                 });
-
-                // Écoute des PINs
-                const unsubscribePins = db.collection('settings').doc('pins').onSnapshot((doc) => {
-                    if (doc.exists) {
-                        setEmployeePins(doc.data());
-                    } else {
-                        // Si le document n'existe pas, initialiser avec 0000 pour tout le monde
-                        const defaultPins = {};
-                        EMPLOYEES.forEach(emp => defaultPins[emp] = '0000');
-                        db.collection('settings').doc('pins').set(defaultPins);
-                        setEmployeePins(defaultPins);
+                const unsubPins = db.collection('settings').doc('pins').onSnapshot(doc => {
+                    if (doc.exists) setEmployeePins(doc.data());
+                    else {
+                        const def = {}; EMPLOYEES.forEach(e => def[e] = '0000');
+                        db.collection('settings').doc('pins').set(def);
                     }
-                }, (error) => {
-                    console.error("Erreur Firebase (pins):", error);
                 });
-
-                // Écoute des messages du Chat
-                const unsubscribeChat = db.collection('chat')
-                    .orderBy('timestamp', 'desc')
-                    .limit(50)
-                    .onSnapshot((snapshot) => {
-                        // On récupère les 50 derniers, puis on les inverse pour l'affichage de haut en bas
-                        const msgs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).reverse();
-                        setChatMessages(msgs);
-                        // Auto-scroll vers le bas
-                        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-                    }, (error) => {
-                        console.error("Erreur Firebase (chat):", error);
-                    });
-
-                return () => {
-                    unsubscribeExceptions();
-                    unsubscribePins();
-                    unsubscribeChat();
-                };
+                const unsubChat = db.collection('chat').orderBy('timestamp', 'desc').limit(50).onSnapshot(snap => {
+                    setChatMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })).reverse());
+                    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+                });
+                return () => { unsubEx(); unsubPins(); unsubChat(); };
             }, []);
 
-            // NOUVEAU : Gérer la pastille de notification du chat
             useEffect(() => {
                 if (chatMessages.length > 0) {
-                    // On récupère l'ID du message le plus récent (le dernier de la liste)
-                    const newestMsgId = chatMessages[chatMessages.length - 1].id;
-                    
-                    if (activeTab === 'chat') {
-                        // Si on est sur le chat, on a tout lu. On enregistre le dernier ID.
-                        setHasUnreadChat(false);
-                        localStorage.setItem('shiftsync_lastReadMsg', newestMsgId);
-                    } else {
-                        // Si on est ailleurs, on compare le dernier ID lu avec le nouveau
-                        const lastReadId = localStorage.getItem('shiftsync_lastReadMsg');
-                        if (newestMsgId !== lastReadId) {
-                            setHasUnreadChat(true); // Il y a un nouveau message !
-                        }
-                    }
+                    const newest = chatMessages[chatMessages.length - 1].id;
+                    if (activeTab === 'chat') { setHasUnreadChat(false); localStorage.setItem('lastRead', newest); }
+                    else { if (newest !== localStorage.getItem('lastRead')) setHasUnreadChat(true); }
                 }
             }, [chatMessages, activeTab]);
 
-            const showToast = (msg) => {
-                setToast(msg);
-                setTimeout(() => setToast(null), 3000);
-            };
-
-            const handleLoginAttempt = (name) => {
-                setLoginModalUser(name);
-                setPinInput('');
-                setPinError(false);
-                setIsChangingPin(false); // Reset mode changement de PIN
-                setChangePinError('');
-            };
-
+            const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
+            const handleLogout = () => { setEmployee(null); localStorage.removeItem('shiftsync_profile'); };
             const handlePinSubmit = () => {
-                // Le code attendu (celui de Firebase, ou '0000' par défaut si pas encore chargé)
-                const expectedPin = employeePins[loginModalUser] || '0000';
-
-                if (expectedPin === pinInput) {
-                    // Si le code est bon ET que c'est le code par défaut (0000), forcer le changement
-                    if (expectedPin === '0000') {
-                        setIsChangingPin(true);
-                        setNewPinInput('');
-                        setConfirmNewPinInput('');
-                        setChangePinError('');
-                    } else {
-                        // Connexion réussie normale
-                        setEmployee(loginModalUser);
-                        localStorage.setItem('shiftsync_profile', loginModalUser);
-                        setLoginModalUser(null);
-                        showToast(`Bienvenue ${loginModalUser} !`);
-                    }
-                } else {
-                    setPinError(true);
-                    setPinInput('');
-                }
-            };
-
-            const handleChangePinSubmit = () => {
-                if (newPinInput.length !== 4 || confirmNewPinInput.length !== 4) {
-                    setChangePinError('Le code doit faire 4 chiffres.');
-                    return;
-                }
-                if (newPinInput !== confirmNewPinInput) {
-                    setChangePinError('Les deux codes ne correspondent pas.');
-                    setNewPinInput('');
-                    setConfirmNewPinInput('');
-                    return;
-                }
-                if (newPinInput === '0000') {
-                    setChangePinError('Veuillez choisir un code différent de 0000.');
-                    setNewPinInput('');
-                    setConfirmNewPinInput('');
-                    return;
-                }
-
-                // Enregistrer le nouveau PIN dans Firebase
-                db.collection('settings').doc('pins').set({
-                    [loginModalUser]: newPinInput
-                }, { merge: true }).then(() => {
-                    // Connexion automatique après changement
-                    setEmployee(loginModalUser);
-                    localStorage.setItem('shiftsync_profile', loginModalUser);
-                    setLoginModalUser(null);
-                    setIsChangingPin(false);
-                    showToast(`Code PIN enregistré, bienvenue ${loginModalUser} !`);
-                }).catch((error) => {
-                    setChangePinError("Erreur lors de l'enregistrement.");
-                    console.error("Firebase write error (pin):", error);
-                });
-            };
-
-            const handleLogout = () => {
-                setEmployee(null);
-                localStorage.removeItem('shiftsync_profile');
+                const exp = employeePins[loginModalUser] || '0000';
+                if (exp === pinInput) {
+                    if (exp === '0000') { setIsChangingPin(true); setNewPinInput(''); setConfirmNewPinInput(''); setChangePinError(''); }
+                    else { setEmployee(loginModalUser); localStorage.setItem('shiftsync_profile', loginModalUser); setLoginModalUser(null); showToast(`Bonjour ${loginModalUser} !`); }
+                } else { setPinError(true); setPinInput(''); }
             };
 
             const submitActivePinChange = () => {
-                if (activeNewPin.length !== 4 || activeConfirmPin.length !== 4) {
-                    setActivePinError('Le code doit faire 4 chiffres.');
-                    return;
-                }
-                if (activeNewPin !== activeConfirmPin) {
-                    setActivePinError('Les deux codes ne correspondent pas.');
-                    setActiveNewPin('');
-                    setActiveConfirmPin('');
-                    return;
-                }
-
-                db.collection('settings').doc('pins').set({
-                    [employee]: activeNewPin
-                }, { merge: true }).then(() => {
-                    setIsChangingActivePin(false);
-                    showToast("Code PIN modifié avec succès ! 🔒");
-                }).catch((error) => {
-                    setActivePinError("Erreur lors de l'enregistrement.");
-                    console.error("Firebase write error (pin):", error);
-                });
+                if (activeNewPin.length !== 4 || activeNewPin !== activeConfirmPin) { setActivePinError('Codes invalides ou différents.'); return; }
+                db.collection('settings').doc('pins').set({ [employee]: activeNewPin }, { merge: true }).then(() => { setIsChangingActivePin(false); showToast("PIN modifié ! 🔒"); });
             };
 
-            const getShiftForDate = (dateObj, empName) => {
-                const dateStr = generateDateString(dateObj);
-                if (exceptions[dateStr] && exceptions[dateStr][empName]) {
-                    return exceptions[dateStr][empName];
-                }
-                const day = dateObj.getDay();
-                const dayName = day === 0 ? 'dimanche' : DAYS_OF_WEEK[day - 1];
-                const cycle = getCycleIndex(dateObj);
-                return SCHEDULE_CYCLE[cycle][empName][dayName] || 'repos';
+            const getShiftForDate = (date, name) => {
+                const ds = generateDateString(date);
+                if (exceptions[ds] && exceptions[ds][name]) return exceptions[ds][name];
+                const day = date.getDay();
+                const nameDay = day === 0 ? 'dimanche' : DAYS_OF_WEEK[day - 1];
+                return SCHEDULE_CYCLE[getCycleIndex(date)][name][nameDay] || 'repos';
             };
 
-            const saveException = (dateStr, empName, newShift) => {
-                // Enregistrement dans la base de données Firebase
-                db.collection('exceptions').doc(dateStr).set({
-                    [empName]: newShift
-                }, { merge: true }).then(() => {
-                    setEditModal(null);
-                    showToast("Horaire synchronisé ! ☁️");
-                }).catch((error) => {
-                    showToast("Erreur de sauvegarde...");
-                    console.error("Firebase write error:", error);
-                });
+            const saveException = (ds, name, val) => {
+                db.collection('exceptions').doc(ds).set({ [name]: val }, { merge: true }).then(() => { setEditModal(null); showToast("Sauvegardé !"); });
             };
 
-            const resetException = (dateStr, empName) => {
-                // Suppression de la modification dans Firebase
-                db.collection('exceptions').doc(dateStr).update({
-                    [empName]: firebase.firestore.FieldValue.delete()
-                }).then(() => {
-                    setEditModal(null);
-                    showToast("Horaire réinitialisé ! ☁️");
-                }).catch((error) => {
-                    // Si le document est déjà vide, on peut le supprimer totalement
-                    if(error.code === 'not-found') {
-                        setEditModal(null);
-                    }
-                });
+            const resetException = (ds, name) => {
+                db.collection('exceptions').doc(ds).update({ [name]: firebase.firestore.FieldValue.delete() }).then(() => { setEditModal(null); showToast("Réinitialisé !"); });
             };
 
             const handleSetVacation = (type) => {
-                if (!vacationStart || !vacationEnd) {
-                    showToast("Sélectionnez les dates !"); return;
-                }
-                const start = new Date(vacationStart);
-                const end = new Date(vacationEnd);
-                if (end < start) {
-                    showToast("Dates invalides !"); return;
-                }
-
+                const s = new Date(vacationStart), e = new Date(vacationEnd);
+                if (!vacationStart || !vacationEnd || e < s) { showToast("Dates invalides"); return; }
                 const batch = db.batch();
-                let loop = new Date(start);
-                
-                while (loop <= end) {
-                    const dateStr = generateDateString(loop);
-                    const docRef = db.collection('exceptions').doc(dateStr);
-                    if (type === 'add') {
-                        batch.set(docRef, { [employee]: "Congés 🌴" }, { merge: true });
-                    } else {
-                        // Utilisation de set + merge avec FieldValue.delete() pour éviter les erreurs not-found
-                        batch.set(docRef, { [employee]: firebase.firestore.FieldValue.delete() }, { merge: true });
-                    }
-                    const newDate = loop.setDate(loop.getDate() + 1);
-                    loop = new Date(newDate);
+                for (let l = new Date(s); l <= e; l.setDate(l.getDate() + 1)) {
+                    const ds = generateDateString(l);
+                    batch.set(db.collection('exceptions').doc(ds), { [employee]: type === 'add' ? "Congés 🌴" : firebase.firestore.FieldValue.delete() }, { merge: true });
                 }
-
-                batch.commit().then(() => {
-                    showToast(type === 'add' ? "Congés enregistrés ! 🌴" : "Congés annulés !");
-                    setVacationStart('');
-                    setVacationEnd('');
-                }).catch(e => {
-                    showToast("Erreur lors de la sauvegarde.");
-                    console.error(e);
-                });
+                batch.commit().then(() => { showToast("Calendrier mis à jour"); setVacationStart(''); setVacationEnd(''); });
             };
 
-            // Fonction d'autodélestage (supprime les messages au delà de 50 pour libérer l'espace)
-            const cleanupOldMessages = async () => {
-                try {
-                    const snapshot = await db.collection('chat').orderBy('timestamp', 'desc').get();
-                    if (snapshot.docs.length > 50) {
-                        // Les documents à supprimer (ceux après le 50ème le plus récent)
-                        const docsToDelete = snapshot.docs.slice(50);
-                        for (let doc of docsToDelete) {
-                            // Suppression du message dans Firestore
-                            await db.collection('chat').doc(doc.id).delete();
-                        }
-                    }
-                } catch (e) {
-                    console.error("Erreur lors de l'autodélestage :", e);
-                }
-            };
-
-            const handleSendChatMessage = async (e) => {
-                e.preventDefault();
-                if (!newChatMessage.trim()) return;
-                
-                const text = newChatMessage.trim();
+            const handleSendChat = async (e) => {
+                e.preventDefault(); if (!newChatMessage.trim()) return;
+                await db.collection('chat').add({ text: newChatMessage.trim(), sender: employee, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                 setNewChatMessage('');
-                
-                try {
-                    await db.collection('chat').add({
-                        text: text,
-                        sender: employee,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                        type: 'text'
-                    });
-                    cleanupOldMessages(); // Déclenche le ménage en arrière-plan
-                } catch (err) {
-                    console.error(err);
-                    showToast("Erreur d'envoi");
-                }
-            };
-
-            const handleShare = (weekDates, totalHours) => {
-                const mondayStr = weekDates[0].date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-                let text = `🗓️ *Mon planning ShiftSync (Sem. du ${mondayStr})*\n\n`;
-                weekDates.forEach(d => { text += `• ${d.dayName} : ${d.horaire}\n`; });
-                text += `\n⏱️ Total estimé : ${totalHours}h`;
-
-                if (navigator.share) {
-                    navigator.share({ title: 'Mon Planning', text: text }).catch(() => {});
-                } else {
-                    navigator.clipboard.writeText(text);
-                    showToast("Planning copié dans le presse-papier !");
-                }
             };
 
             if (!employee) {
                 return (
-                    <div className="min-h-screen flex flex-col items-center justify-center p-6 safe-top safe-bottom">
-                        <div className="bg-white dark:bg-darkcard rounded-3xl shadow-xl p-8 w-full max-w-md text-center border border-slate-100 dark:border-slate-800">
-                            <div className="bg-gradient-to-br from-cyan-400 to-blue-600 text-white w-20 h-20 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/40">
-                                <span className="text-[2.75rem] font-black tracking-tighter">S</span>
-                            </div>
-                            <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">ShiftSync</h1>
-                            <p className="text-slate-500 dark:text-slate-400 mb-6">Sélectionnez votre profil pour commencer</p>
-                            
-                            <div className="space-y-3 overflow-y-auto max-h-[50vh] pr-1">
-                                {EMPLOYEES.map((name) => (
-                                    <button key={name} onClick={() => handleLoginAttempt(name)}
-                                        className="w-full bg-slate-50 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 font-semibold py-3.5 px-5 rounded-2xl border-2 border-slate-100 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-800 transition-all active:scale-95 flex justify-between items-center"
-                                    >
-                                        <div className="flex items-center gap-3"><IconUser /><span className="text-lg">{name}</span></div>
-                                        <div className="text-slate-400 dark:text-slate-500"><IconChevronRight /></div>
+                    <div className="min-h-screen flex items-center justify-center p-6 relative z-10">
+                        <div className="glass rounded-[2.5rem] p-8 w-full max-w-md text-center">
+                            <div className="glass-strong text-purple-600 dark:text-purple-300 w-20 h-20 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-xl shadow-purple-500/20"><span className="text-4xl font-black tracking-tighter">S</span></div>
+                            <h1 className="text-3xl font-black mb-6 tracking-tight">ShiftSync</h1>
+                            <div className="space-y-3 overflow-y-auto max-h-[50vh]">
+                                {EMPLOYEES.map(n => (
+                                    <button key={n} onClick={() => { setLoginModalUser(n); setPinInput(''); setPinError(false); }} className="w-full glass-strong hover:bg-white/60 dark:hover:bg-slate-700/60 font-bold py-4 px-6 rounded-2xl flex justify-between items-center transition-all active:scale-95">
+                                        <span className="text-lg">{n}</span><IconChevronRight />
                                     </button>
                                 ))}
                             </div>
                         </div>
-
-                        {/* MODAL DE CONNEXION (CODE PIN) */}
                         {loginModalUser && (
-                            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                                <div className="bg-white dark:bg-darkcard rounded-3xl w-full max-w-xs p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-center border border-slate-100 dark:border-slate-700">
-                                    <div className="mx-auto bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 w-12 h-12 rounded-full flex items-center justify-center mb-4">
-                                        <IconUser />
-                                    </div>
-                                    
+                            <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                                <div className="glass-strong rounded-3xl w-full max-w-xs p-8 text-center animate-in zoom-in-95 shadow-2xl border border-white/30">
+                                    <h3 className="text-2xl font-black mb-4">{isChangingPin ? 'Nouveau PIN' : 'Code PIN'}</h3>
                                     {!isChangingPin ? (
-                                        // VUE DE CONNEXION NORMALE
                                         <>
-                                            <h3 className="text-xl font-bold mb-1 dark:text-white">Code secret</h3>
-                                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-                                                Identifiez-vous en tant que <strong>{loginModalUser}</strong>
-                                                <br/>
-                                                <span className="text-xs italic">(Code par défaut: 0000)</span>
-                                            </p>
-                                            
-                                            <input 
-                                                type="password" 
-                                                pattern="[0-9]*"
-                                                inputMode="numeric"
-                                                maxLength="4"
-                                                value={pinInput}
-                                                onChange={(e) => { setPinInput(e.target.value); setPinError(false); }}
-                                                className={`w-full text-center text-3xl tracking-[0.5em] bg-slate-50 dark:bg-slate-900 border ${pinError ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'} rounded-xl p-4 font-bold text-slate-800 dark:text-white mb-2 focus:ring-2 focus:ring-blue-500 outline-none transition-colors`}
-                                                placeholder="••••"
-                                            />
-                                            {pinError && <p className="text-red-500 text-xs font-bold mb-4 animate-bounce">Code incorrect</p>}
-                                            {!pinError && <div className="h-4 mb-4"></div>}
-
-                                            <div className="flex gap-3 mt-2">
-                                                <button onClick={() => setLoginModalUser(null)} className="flex-1 py-3 rounded-xl font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">
-                                                    Annuler
-                                                </button>
-                                                <button onClick={handlePinSubmit} className="flex-1 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-                                                    Valider
-                                                </button>
+                                            <p className="text-sm mb-6 opacity-70">Identifiez-vous : <b>{loginModalUser}</b></p>
+                                            <input type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" value={pinInput} onChange={e => setPinInput(e.target.value)} className="w-full text-center text-3xl glass-input rounded-2xl p-4 font-black mb-4 focus:ring-4 focus:ring-purple-400 outline-none shadow-inner" placeholder="••••" />
+                                            {pinError && <p className="text-red-500 text-xs font-bold mb-4">Code erroné</p>}
+                                            <div className="flex gap-2">
+                                                <button onClick={() => setLoginModalUser(null)} className="flex-1 glass py-3 rounded-xl font-bold">Annuler</button>
+                                                <button onClick={handlePinSubmit} className="flex-1 bg-purple-600 text-white py-3 rounded-xl font-bold shadow-lg">Entrer</button>
                                             </div>
                                         </>
                                     ) : (
-                                        // VUE CHANGEMENT DE PIN OBLIGATOIRE
-                                        <>
-                                            <h3 className="text-xl font-bold mb-1 dark:text-white">Nouveau code</h3>
-                                            <p className="text-sm text-amber-600 dark:text-amber-500 font-medium mb-6">
-                                                Première connexion ! Veuillez choisir un code PIN à 4 chiffres.
-                                            </p>
-                                            
-                                            <div className="space-y-3 mb-4">
-                                                <div>
-                                                    <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase block text-left mb-1">Nouveau code</label>
-                                                    <input 
-                                                        type="password" 
-                                                        pattern="[0-9]*"
-                                                        inputMode="numeric"
-                                                        maxLength="4"
-                                                        value={newPinInput}
-                                                        onChange={(e) => { setNewPinInput(e.target.value); setChangePinError(''); }}
-                                                        className="w-full text-center text-2xl tracking-[0.3em] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                                                        placeholder="••••"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase block text-left mb-1">Confirmer</label>
-                                                    <input 
-                                                        type="password" 
-                                                        pattern="[0-9]*"
-                                                        inputMode="numeric"
-                                                        maxLength="4"
-                                                        value={confirmNewPinInput}
-                                                        onChange={(e) => { setConfirmNewPinInput(e.target.value); setChangePinError(''); }}
-                                                        className="w-full text-center text-2xl tracking-[0.3em] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                                                        placeholder="••••"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            {changePinError && <p className="text-red-500 text-xs font-bold mb-4 animate-pulse">{changePinError}</p>}
-                                            {!changePinError && <div className="h-4 mb-4"></div>}
-
-                                            <div className="flex gap-3 mt-2">
-                                                <button onClick={() => { setIsChangingPin(false); setLoginModalUser(null); }} className="flex-1 py-3 rounded-xl font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">
-                                                    Annuler
-                                                </button>
-                                                <button onClick={handleChangePinSubmit} className="flex-1 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-                                                    Enregistrer
-                                                </button>
-                                            </div>
-                                        </>
+                                        <div className="space-y-4">
+                                            <input type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" value={newPinInput} onChange={e => setNewPinInput(e.target.value)} className="w-full text-center text-xl glass-input rounded-xl p-3 font-bold" placeholder="Nouveau PIN" />
+                                            <input type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" value={confirmNewPinInput} onChange={e => setConfirmNewPinInput(e.target.value)} className="w-full text-center text-xl glass-input rounded-xl p-3 font-bold" placeholder="Confirmer" />
+                                            {changePinError && <p className="text-red-500 text-xs font-bold">{changePinError}</p>}
+                                            <button onClick={() => {
+                                                if(newPinInput === confirmNewPinInput && newPinInput.length === 4) {
+                                                    db.collection('settings').doc('pins').set({[loginModalUser]: newPinInput}, {merge:true}).then(() => { setEmployee(loginModalUser); setLoginModalUser(null); setIsChangingPin(false); });
+                                                } else setChangePinError('Invalide');
+                                            }} className="w-full bg-purple-600 text-white py-3 rounded-xl font-bold shadow-lg">Sauver</button>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -659,135 +363,72 @@
             }
 
             const currentMonday = getMonday(currentViewDate);
-            const today = new Date();
-            const todayStr = generateDateString(today);
-
-            let totalHoursThisWeek = 0;
-            const weekDates = DAYS_OF_WEEK.map((dayName, index) => {
-                const date = new Date(currentMonday);
-                date.setDate(currentMonday.getDate() + index);
-                const shift = getShiftForDate(date, employee);
-                totalHoursThisWeek += parseHours(shift);
-                return { dayName, date, dateString: generateDateString(date), horaire: shift };
+            const todayStr = generateDateString(new Date());
+            let totalW = 0;
+            const wD = DAYS_OF_WEEK.map((d, i) => {
+                const dt = new Date(currentMonday); dt.setDate(currentMonday.getDate() + i);
+                const s = getShiftForDate(dt, employee); totalW += parseHours(s);
+                return { d, dt, ds: generateDateString(dt), s };
             });
 
             return (
-                <div className="min-h-screen pb-24 safe-bottom flex flex-col">
-                    {/* TOAST MESSAGE */}
-                    {toast && (
-                        <div className="fixed top-[calc(env(safe-area-inset-top)+1rem)] left-1/2 -translate-x-1/2 z-50 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl font-semibold flex items-center gap-2 animate-bounce">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            {toast}
-                        </div>
-                    )}
-
-                    {/* HEADER */}
-                    <header className="bg-blue-600 text-white shadow-md rounded-b-[1.5rem] px-6 pb-4 pt-[calc(env(safe-area-inset-top)+0.75rem)] sticky top-0 z-10">
+                <div className="min-h-screen flex flex-col relative z-10">
+                    {toast && <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 glass-strong px-6 py-3 rounded-full shadow-xl font-bold animate-bounce border-2 border-purple-300/50">{toast}</div>}
+                    
+                    <header className="glass-strong rounded-b-[2.5rem] px-6 pb-5 pt-[calc(env(safe-area-inset-top)+1rem)] sticky top-0 z-40 shadow-lg border-b border-white/20">
                         <div className="max-w-md mx-auto flex justify-between items-center">
                             <div className="flex items-center gap-3">
-                                <div className="bg-gradient-to-br from-cyan-400 to-blue-600 w-12 h-12 rounded-xl flex items-center justify-center shadow-inner border border-white/20">
-                                    <span className="text-2xl font-black tracking-tighter">S</span>
-                                </div>
-                                <div>
-                                    <h1 className="text-2xl font-bold tracking-tight">{employee}</h1>
-                                </div>
+                                <div className="bg-gradient-to-br from-purple-500 to-indigo-500 text-white w-10 h-10 rounded-xl flex items-center justify-center font-black shadow-lg">S</div>
+                                <h1 className="text-xl font-black truncate max-w-[140px] tracking-tight">{employee}</h1>
                             </div>
                             <div className="flex gap-2">
-                                <button onClick={() => setIsDarkMode(!isDarkMode)} className="bg-white/20 p-2.5 rounded-full hover:bg-white/30 transition backdrop-blur-sm active:scale-90">
+                                <button onClick={() => setIsDarkMode(!isDarkMode)} className="glass-strong p-2.5 rounded-full shadow-sm active:scale-90 transition-transform">
                                     {isDarkMode ? <IconSun /> : <IconMoon />}
                                 </button>
-                                <button onClick={() => { setIsChangingActivePin(true); setActiveNewPin(''); setActiveConfirmPin(''); setActivePinError(''); }} className="bg-white/20 p-2.5 rounded-full hover:bg-white/30 transition backdrop-blur-sm active:scale-90 text-blue-100 hover:text-white" title="Modifier mon code PIN">
+                                <button onClick={() => { setIsChangingActivePin(true); setActiveNewPin(''); setActiveConfirmPin(''); }} className="glass-strong p-2.5 rounded-full text-purple-600 dark:text-purple-400 shadow-sm active:scale-90 transition-transform">
                                     <IconKey />
                                 </button>
-                                <button onClick={handleLogout} className="bg-white/20 p-2.5 rounded-full hover:bg-white/30 transition backdrop-blur-sm active:scale-90 text-red-100 hover:text-white">
+                                <button onClick={handleLogout} className="glass-strong p-2.5 rounded-full text-red-500 shadow-sm active:scale-90 transition-transform">
                                     <IconLogOut />
                                 </button>
                             </div>
                         </div>
                     </header>
 
-                    <main className="max-w-md mx-auto px-4 flex-1 w-full mt-6">
-                        
-                        {/* NAVIGATION TEMPORELLE */}
+                    <main className="max-w-md mx-auto px-4 flex-1 w-full mt-6 pb-48">
                         {(activeTab === 'me' || activeTab === 'team') && (
-                            <div className="bg-white dark:bg-darkcard border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm p-2 mb-6 flex justify-between items-center">
-                                <button onClick={() => setCurrentViewDate(new Date(currentViewDate.setDate(currentViewDate.getDate() - 7)))} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-xl transition active:scale-90">
-                                    <IconChevronLeft />
+                            <div className="glass rounded-[2rem] p-2 mb-6 flex justify-between items-center shadow-sm border border-white/30">
+                                <button onClick={() => setCurrentViewDate(new Date(currentViewDate.setDate(currentViewDate.getDate()-7)))} className="p-3 opacity-50 hover:opacity-100 transition"><IconChevronLeft /></button>
+                                <button onClick={() => setCurrentViewDate(new Date())} className="flex flex-col items-center px-6 py-1 glass rounded-2xl border border-white/20 shadow-inner">
+                                    <span className="text-[9px] font-black uppercase opacity-40 tracking-widest mb-0.5">Semaine du</span>
+                                    <span className="font-black text-lg">{currentMonday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
                                 </button>
-                                
-                                <button onClick={() => setCurrentViewDate(new Date())} className="flex flex-col items-center px-4 py-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition active:scale-95">
-                                    <span className="text-xs font-semibold uppercase text-slate-400 dark:text-slate-500 tracking-wider">
-                                        Semaine du
-                                    </span>
-                                    <span className="font-bold text-slate-800 dark:text-white text-lg">
-                                        {currentMonday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                                    </span>
-                                </button>
-                                
-                                <button onClick={() => setCurrentViewDate(new Date(currentViewDate.setDate(currentViewDate.getDate() + 7)))} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-xl transition active:scale-90">
-                                    <IconChevronRight />
-                                </button>
+                                <button onClick={() => setCurrentViewDate(new Date(currentViewDate.setDate(currentViewDate.getDate()+7)))} className="p-3 opacity-50 hover:opacity-100 transition"><IconChevronRight /></button>
                             </div>
                         )}
 
-                        {/* ONGLET 1 : MON PLANNING */}
                         {activeTab === 'me' && (
-                            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                <div className="flex justify-between items-center px-1 mb-2">
-                                    <div className="text-sm font-bold text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-800 px-3 py-1 rounded-lg">
-                                        Total : {totalHoursThisWeek}h
-                                    </div>
-                                    <button onClick={() => handleShare(weekDates, totalHoursThisWeek)} className="text-blue-600 dark:text-blue-400 text-sm font-bold flex items-center gap-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-3 py-1 rounded-lg transition">
-                                        <IconShare /> Partager
-                                    </button>
+                            <div className="space-y-4 animate-in fade-in duration-300">
+                                <div className="flex justify-between items-center px-2">
+                                    <div className="glass-strong px-5 py-2.5 rounded-2xl font-black shadow-sm text-purple-700 dark:text-purple-300 border border-purple-200/50">Total : {totalW.toFixed(1)}h</div>
                                 </div>
-
-                                {weekDates.map(({ dayName, date, dateString, horaire }) => {
-                                    const isToday = dateString === todayStr;
-                                    const isOff = horaire.toLowerCase().includes('repos') || horaire.toLowerCase().includes('cong');
-                                    const hasException = exceptions[dateString] && exceptions[dateString][employee];
-
+                                {wD.map(({ d, dt, ds, s }) => {
+                                    const isT = ds === todayStr; const isO = s.toLowerCase().includes('repos') || s.toLowerCase().includes('cong');
                                     return (
-                                        <div key={dayName} className={`relative overflow-hidden rounded-2xl p-5 border ${
-                                                isToday ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 shadow-md ring-2 ring-blue-500/50' 
-                                                : isOff ? 'bg-slate-50 dark:bg-darkbg border-slate-200 dark:border-slate-800 opacity-80'
-                                                : 'bg-white dark:bg-darkcard border-slate-100 dark:border-slate-700 shadow-sm'
-                                            } transition-all`}
-                                        >
-                                            {hasException && (
-                                                <div className="absolute top-0 left-0 bg-amber-400 text-amber-900 text-[9px] uppercase font-bold px-2 py-0.5 rounded-br-lg shadow-sm">
-                                                    Modifié
+                                        <div key={ds} className={`glass p-5 rounded-[1.5rem] relative border border-white/30 transition-all ${isT ? 'ring-2 ring-purple-500/40 bg-white/70 dark:bg-slate-800/80 shadow-2xl' : ''}`}>
+                                            {isT && (
+                                                <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[9px] px-3 py-1 rounded-tr-[1.5rem] rounded-bl-xl font-black uppercase tracking-tighter shadow-md z-10">
+                                                    Aujourd'hui
                                                 </div>
                                             )}
-                                            {isToday && (
-                                                <div className="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl shadow-sm">
-                                                    AUJOURD'HUI
-                                                </div>
-                                            )}
-
-                                            <div className="flex items-center justify-between mt-1">
+                                            <div className="flex justify-between items-center">
                                                 <div>
-                                                    <h3 className={`capitalize font-bold text-lg ${isToday ? 'text-blue-800 dark:text-blue-300' : 'text-slate-800 dark:text-slate-200'}`}>
-                                                        {dayName}
-                                                    </h3>
-                                                    <p className="text-slate-500 dark:text-slate-400 text-sm">
-                                                        {date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
-                                                    </p>
+                                                    <h3 className="capitalize font-black text-xl tracking-tight">{d}</h3>
+                                                    <p className="opacity-50 text-sm font-bold">{dt.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}</p>
                                                 </div>
-
                                                 <div className="flex items-center gap-2">
-                                                    <div className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold shadow-sm ${
-                                                        isOff ? 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400' 
-                                                        : isToday ? 'bg-blue-600 text-white shadow-blue-200 dark:shadow-none'
-                                                        : 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300'
-                                                    }`}>
-                                                        {isOff ? <IconCoffee /> : <IconClock />}
-                                                        {horaire}
-                                                    </div>
-                                                    
-                                                    <button onClick={() => setEditModal({dateString, empName: employee, currentShift: horaire})} className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg transition">
-                                                        <IconEdit />
-                                                    </button>
+                                                    <div className={`px-3 py-1.5 rounded-xl font-black shadow-sm text-sm ${isO ? 'glass opacity-50 text-slate-700 dark:text-slate-400' : 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-purple-500/30'}`}>{s}</div>
+                                                    <button onClick={() => setEditModal({ds, name: employee, curr: s})} className="p-2 opacity-30 hover:opacity-100 active:scale-90 transition-all"><IconEdit /></button>
                                                 </div>
                                             </div>
                                         </div>
@@ -796,269 +437,148 @@
                             </div>
                         )}
 
-                        {/* ONGLET 2 : VUE EQUIPE */}
                         {activeTab === 'team' && (
-                            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                
-                                {/* SELECTEUR DE JOUR */}
-                                <div className="flex justify-between items-center bg-white dark:bg-darkcard p-1.5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-x-auto">
-                                    {DAYS_OF_WEEK.map((dayName, index) => {
-                                        const dateObj = new Date(currentMonday);
-                                        dateObj.setDate(currentMonday.getDate() + index);
-                                        const isSelected = generateDateString(dateObj) === generateDateString(currentViewDate);
-                                        const isTodayStr = generateDateString(dateObj) === generateDateString(new Date());
+                            <div className="space-y-4 animate-in fade-in duration-300">
+                                <div className="glass p-2 rounded-[2rem] flex justify-between overflow-x-auto gap-1 border border-white/30 shadow-sm">
+                                    {DAYS_OF_WEEK.map((day, i) => {
+                                        const dt = new Date(currentMonday); dt.setDate(currentMonday.getDate() + i);
+                                        const isS = generateDateString(dt) === generateDateString(currentViewDate);
                                         return (
-                                            <button
-                                                key={dayName}
-                                                onClick={() => setCurrentViewDate(dateObj)}
-                                                className={`flex flex-col items-center justify-center w-11 h-14 rounded-xl transition ${isSelected ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
-                                            >
-                                                <span className="text-[10px] uppercase font-bold">{dayName.substring(0,3)}</span>
-                                                <span className={`text-sm font-bold ${isSelected ? 'text-white' : isTodayStr ? 'text-blue-600 dark:text-blue-400' : 'text-slate-800 dark:text-slate-200'}`}>{dateObj.getDate()}</span>
+                                            <button key={day} onClick={() => setCurrentViewDate(dt)} className={`flex flex-col items-center justify-center min-w-[13%] h-14 rounded-2xl transition-all ${isS ? 'bg-gradient-to-b from-purple-500 to-indigo-600 text-white shadow-xl' : 'opacity-40 hover:opacity-100 font-bold'}`}>
+                                                <span className="text-[9px] uppercase font-black">{day.substring(0,3)}</span>
+                                                <span className="font-black text-lg">{dt.getDate()}</span>
                                             </button>
-                                        )
+                                        );
                                     })}
                                 </div>
-
-                                <h2 className="text-lg font-bold text-slate-800 dark:text-white px-2 mt-4">L'équipe du jour</h2>
-                                
-                                {EMPLOYEES.map(empName => {
-                                    const shift = getShiftForDate(currentViewDate, empName);
-                                    const isOff = shift.toLowerCase().includes('repos') || shift.toLowerCase().includes('cong');
-                                    const dateStr = generateDateString(currentViewDate);
-                                    const hasException = exceptions[dateStr] && exceptions[dateStr][empName];
-                                    const isMe = empName === employee;
-
-                                    return (
-                                        <div key={empName} className={`flex items-center justify-between p-4 rounded-2xl border ${isMe ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-darkcard border-slate-100 dark:border-slate-800'}`}>
-                                            <div className="flex items-center gap-4">
-                                                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${isOff ? 'bg-slate-100 dark:bg-slate-800 text-slate-400' : isMe ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300' : 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300'}`}>
-                                                    {empName.charAt(0)}
-                                                </div>
-                                                <div>
-                                                    <div className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                                                        {empName} {isMe && <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full uppercase">Moi</span>}
-                                                    </div>
-                                                    {hasException && <div className="text-xs text-amber-500 font-medium mt-0.5">Horaire modifié</div>}
-                                                </div>
-                                            </div>
-                                            <div className={`px-3 py-1.5 rounded-lg font-bold text-sm ${isOff ? 'bg-slate-100 dark:bg-slate-800 text-slate-500' : 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900'}`}>
-                                                {shift}
-                                            </div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        )}
-
-                        {/* ONGLET 3 : VACANCES */}
-                        {activeTab === 'vacances' && (
-                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                <div className="bg-white dark:bg-darkcard p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mb-4">
-                                        <IconPlane />
-                                    </div>
-                                    <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Poser mes congés</h2>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-                                        Sélectionnez une période. Les jours choisis apparaîtront comme "Congés 🌴" pour vous et votre équipe.
-                                    </p>
-
-                                    <div className="space-y-4 mb-6">
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1 block">Du (inclus)</label>
-                                            <input type="date" value={vacationStart} onChange={e => setVacationStart(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1 block">Au (inclus)</label>
-                                            <input type="date" value={vacationEnd} onChange={e => setVacationEnd(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-col gap-3">
-                                        <button onClick={() => handleSetVacation('add')} className="w-full py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition">
-                                            Enregistrer ces congés
-                                        </button>
-                                        <button onClick={() => handleSetVacation('remove')} className="w-full py-3 rounded-xl font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 transition">
-                                            Retirer les congés sur cette période
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* ONGLET 4 : CHAT MESSAGERIE (TEXTE UNIQUEMENT) */}
-                        {activeTab === 'chat' && (
-                            <div className="flex flex-col h-[calc(100vh-16rem)]">
-                                {/* Conteneur des messages */}
-                                <div className="flex-1 overflow-y-auto space-y-4 px-1 pb-4">
-                                    {chatMessages.length === 0 && (
-                                        <div className="text-center text-slate-400 mt-10">
-                                            <IconMessage className="mx-auto mb-2 opacity-50" size={40} />
-                                            <p>Aucun message. Soyez le premier à écrire !</p>
-                                        </div>
-                                    )}
-                                    {chatMessages.map(msg => {
-                                        const isMe = msg.sender === employee;
+                                <h2 className="text-2xl font-black px-2 mt-8 tracking-tight">L'équipe du jour</h2>
+                                <div className="space-y-3">
+                                    {EMPLOYEES.map(n => {
+                                        const s = getShiftForDate(currentViewDate, n); const isO = s.toLowerCase().includes('repos') || s.toLowerCase().includes('cong');
                                         return (
-                                            <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                                                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-1 px-2">{msg.sender}</span>
-                                                <div className={`max-w-[85%] rounded-2xl p-3 shadow-sm ${
-                                                    isMe ? 'bg-blue-600 text-white rounded-br-none' 
-                                                         : 'bg-white dark:bg-darkcard border border-slate-100 dark:border-slate-800 text-slate-800 dark:text-white rounded-bl-none'
-                                                }`}>
-                                                    {msg.text && <p className="text-[15px] whitespace-pre-wrap break-words leading-relaxed">{msg.text}</p>}
+                                            <div key={n} className="glass p-4 rounded-[1.5rem] flex justify-between items-center border border-white/20 transition-all">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-11 h-11 rounded-full flex items-center justify-center font-black shadow-inner text-lg ${isO ? 'glass border border-white/40 opacity-50' : 'bg-gradient-to-br from-purple-100 to-indigo-100 text-purple-700 dark:from-purple-900/40 dark:to-indigo-900/40 dark:text-purple-300'}`}>{n.charAt(0)}</div>
+                                                    <span className="font-black text-lg tracking-tight">{n} {n === employee && <span className="text-[9px] bg-purple-600 text-white px-2 py-0.5 rounded-full uppercase ml-2 shadow-sm font-black">Moi</span>}</span>
+                                                </div>
+                                                <div className={`px-4 py-2.5 rounded-2xl font-black text-sm transition-colors ${isO ? 'opacity-30 text-slate-500 bg-slate-200/50 dark:bg-slate-800/50' : 'bg-purple-100/50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-200 shadow-sm'}`}>
+                                                    {s}
                                                 </div>
                                             </div>
-                                        )
+                                        );
                                     })}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'vacances' && (
+                            <div className="glass-strong p-8 rounded-[2.5rem] space-y-8 border border-white/30 shadow-2xl">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg"><IconPlane /></div>
+                                    <h2 className="text-2xl font-black tracking-tight">Mes Congés</h2>
+                                </div>
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="text-[10px] font-black uppercase opacity-40 ml-3 mb-2 block tracking-widest">Début de période</label>
+                                        <input type="date" value={vacationStart} onChange={e => setVacationStart(e.target.value)} className="w-full glass-input rounded-2xl p-4 font-black shadow-inner outline-none focus:ring-4 focus:ring-purple-400/20" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black uppercase opacity-40 ml-3 mb-2 block tracking-widest">Fin de période</label>
+                                        <input type="date" value={vacationEnd} onChange={e => setVacationEnd(e.target.value)} className="w-full glass-input rounded-2xl p-4 font-black shadow-inner outline-none focus:ring-4 focus:ring-purple-400/20" />
+                                    </div>
+                                    <div className="pt-6 space-y-4">
+                                        <button onClick={() => handleSetVacation('add')} className="w-full py-5 rounded-[1.25rem] font-black text-white bg-gradient-to-r from-purple-600 to-indigo-600 shadow-2xl shadow-purple-500/20 active:scale-95 transition-transform tracking-tight">Enregistrer mes congés 🌴</button>
+                                        <button onClick={() => handleSetVacation('remove')} className="w-full py-4 rounded-[1.25rem] font-black glass text-red-500 active:scale-95 transition-transform">Annuler cette sélection</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'chat' && (
+                            <div className="flex flex-col h-[calc(100vh-23rem)]">
+                                <div className="flex-1 overflow-y-auto space-y-5 p-2 pb-12">
+                                    {chatMessages.map(m => (
+                                        <div key={m.id} className={`flex flex-col ${m.sender === employee ? 'items-end' : 'items-start'} animate-in slide-in-from-bottom-2 duration-300`}>
+                                            <span className="text-[9px] font-black opacity-40 px-3 uppercase tracking-widest mb-1">{m.sender}</span>
+                                            <div className={`max-w-[85%] rounded-[1.75rem] px-5 py-3.5 shadow-lg border border-white/20 ${m.sender === employee ? 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-br-sm' : 'glass-strong rounded-bl-sm font-semibold text-slate-800 dark:text-white'}`}>
+                                                <p className="leading-relaxed">{m.text}</p>
+                                            </div>
+                                        </div>
+                                    ))}
                                     <div ref={messagesEndRef} />
                                 </div>
                             </div>
                         )}
                     </main>
 
-                    {/* INPUT CHAT (Fixé juste au dessus du menu) */}
                     {activeTab === 'chat' && (
-                        <div className="fixed bottom-[4.5rem] left-0 right-0 p-3 bg-slate-100/90 dark:bg-darkbg/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-10 pb-[calc(env(safe-area-inset-bottom)+4.5rem)]">
-                            <div className="max-w-md mx-auto flex items-end gap-1">
-                                <form onSubmit={handleSendChatMessage} className="flex-1 flex gap-2 ml-1">
-                                    <input 
-                                        type="text" 
-                                        value={newChatMessage} 
-                                        onChange={e => setNewChatMessage(e.target.value)} 
-                                        placeholder="Votre message..." 
-                                        className="flex-1 bg-white dark:bg-darkcard border border-slate-200 dark:border-slate-700 rounded-3xl px-4 py-3 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-                                    />
-                                    <button type="submit" disabled={!newChatMessage.trim()} className="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-md shadow-blue-500/30 mb-0.5">
-                                        <IconSend />
-                                    </button>
-                                </form>
+                        <div className="fixed bottom-24 left-4 right-4 z-40">
+                            <form onSubmit={handleSendChat} className="glass-strong rounded-[2.5rem] p-2.5 flex items-center gap-3 shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-white/40">
+                                <input type="text" value={newChatMessage} onChange={e => setNewChatMessage(e.target.value)} placeholder="Écrire un message..." className="flex-1 bg-transparent px-5 py-3 font-bold text-slate-900 dark:text-white focus:outline-none placeholder:opacity-40" />
+                                <button type="submit" disabled={!newChatMessage.trim()} className="p-4 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-full shadow-lg active:scale-90 transition-transform disabled:opacity-30 disabled:grayscale"><IconSend /></button>
+                            </form>
+                        </div>
+                    )}
+
+                    <nav className="fixed bottom-0 left-0 right-0 glass-strong safe-bottom pt-3 pb-safe px-6 flex justify-between shadow-[0_-15px_40px_rgba(0,0,0,0.1)] z-50 border-t border-white/30">
+                        <div className="max-w-md mx-auto w-full flex justify-between gap-2">
+                            <button onClick={() => setActiveTab('me')} className={`flex-1 flex flex-col items-center py-3.5 rounded-2xl transition-all ${activeTab === 'me' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
+                                <IconUser /><span className="text-[9px] font-black uppercase mt-1.5 tracking-tighter">Moi</span>
+                            </button>
+                            <button onClick={() => setActiveTab('team')} className={`flex-1 flex flex-col items-center py-3.5 rounded-2xl transition-all ${activeTab === 'team' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
+                                <IconUsers /><span className="text-[9px] font-black uppercase mt-1.5 tracking-tighter">Équipe</span>
+                            </button>
+                            <button onClick={() => setActiveTab('vacances')} className={`flex-1 flex flex-col items-center py-3.5 rounded-2xl transition-all ${activeTab === 'vacances' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
+                                <IconPlane /><span className="text-[9px] font-black uppercase mt-1.5 tracking-tighter">Congés</span>
+                            </button>
+                            <button onClick={() => setActiveTab('chat')} className={`flex-1 flex flex-col items-center py-3.5 rounded-2xl transition-all relative ${activeTab === 'chat' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
+                                <IconMessage />
+                                {hasUnreadChat && (
+                                    <span className="absolute top-3 right-1/4 h-3 w-3 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse shadow-md"></span>
+                                )}
+                                <span className="text-[9px] font-black uppercase mt-1.5 tracking-tighter">Chat</span>
+                            </button>
+                        </div>
+                    </nav>
+
+                    {isChangingActivePin && (
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-lg z-[60] flex items-center justify-center p-4">
+                            <div className="glass-strong rounded-[3rem] p-10 w-full max-w-xs text-center border border-white/30 shadow-2xl">
+                                <h3 className="font-black text-2xl mb-8 text-purple-700 dark:text-purple-300 tracking-tight">Modifier PIN</h3>
+                                <div className="space-y-4 mb-8">
+                                    <input type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" value={activeNewPin} onChange={e => setActiveNewPin(e.target.value)} className="w-full glass-input rounded-2xl p-5 font-black text-center text-3xl shadow-inner outline-none focus:ring-4 focus:ring-purple-500/20" placeholder="PIN" />
+                                    <input type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" value={activeConfirmPin} onChange={e => setActiveConfirmPin(e.target.value)} className="w-full glass-input rounded-2xl p-5 font-black text-center text-3xl shadow-inner outline-none focus:ring-4 focus:ring-purple-500/20" placeholder="Confirmer" />
+                                </div>
+                                {activePinError && <p className="text-red-500 text-xs font-bold mb-4">{activePinError}</p>}
+                                <div className="flex gap-3">
+                                    <button onClick={() => setIsChangingActivePin(false)} className="flex-1 glass py-4 rounded-2xl font-black text-slate-500">Annuler</button>
+                                    <button onClick={submitActivePinChange} className="flex-1 bg-purple-600 text-white py-4 rounded-2xl font-black shadow-xl shadow-purple-500/30">Sauver</button>
+                                </div>
                             </div>
                         </div>
                     )}
 
-                    {/* BOTTOM NAVIGATION */}
-                    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-darkcard border-t border-slate-200 dark:border-slate-800 pb-safe pt-2 px-4 pb-4 z-20">
-                        <div className="max-w-md mx-auto flex justify-between gap-1">
-                            <button onClick={() => setActiveTab('me')} className={`flex flex-col items-center p-2 rounded-xl flex-1 transition ${activeTab === 'me' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
-                                <IconUser />
-                                <span className="text-[10px] font-bold mt-1 uppercase">Moi</span>
-                            </button>
-                            <button onClick={() => setActiveTab('team')} className={`flex flex-col items-center p-2 rounded-xl flex-1 transition ${activeTab === 'team' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
-                                <IconUsers />
-                                <span className="text-[10px] font-bold mt-1 uppercase">L'Équipe</span>
-                            </button>
-                            <button onClick={() => setActiveTab('vacances')} className={`flex flex-col items-center p-2 rounded-xl flex-1 transition ${activeTab === 'vacances' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
-                                <IconPlane />
-                                <span className="text-[10px] font-bold mt-1 uppercase">Congés</span>
-                            </button>
-                            <button onClick={() => setActiveTab('chat')} className={`flex flex-col items-center p-2 rounded-xl flex-1 transition ${activeTab === 'chat' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
-                                <div className="relative">
-                                    <IconMessage />
-                                    {/* NOUVEAU : Affichage de la pastille rouge si hasUnreadChat est Vrai */}
-                                    {hasUnreadChat && (
-                                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-white dark:border-darkcard"></span>
-                                        </span>
-                                    )}
-                                </div>
-                                <span className="text-[10px] font-bold mt-1 uppercase">Chat</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* MODAL EDITION */}
                     {editModal && (
-                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                            <div className="bg-white dark:bg-darkcard rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in-95 duration-200">
-                                <h3 className="text-xl font-bold mb-4 dark:text-white">Modifier l'horaire</h3>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-                                    Date : <strong className="text-slate-800 dark:text-slate-200">{new Date(editModal.dateString).toLocaleDateString('fr-FR', {weekday: 'long', day:'numeric', month:'long'})}</strong><br/>
-                                    Profil : <strong className="text-slate-800 dark:text-slate-200">{editModal.empName}</strong>
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-lg z-[60] flex items-center justify-center p-4">
+                            <div className="glass-strong rounded-[2.5rem] p-8 w-full max-w-sm border border-white/30 shadow-2xl">
+                                <h3 className="font-black text-2xl mb-6 flex items-center gap-3 tracking-tight">
+                                    <div className="w-10 h-10 bg-purple-600 text-white rounded-xl flex items-center justify-center shadow-lg text-sm">🗓️</div>
+                                    Modifier Horaire
+                                </h3>
+                                <p className="mb-6 opacity-60 text-sm font-bold ml-1 px-2 border-l-4 border-purple-500">
+                                    {new Date(editModal.ds).toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'})}
                                 </p>
-                                
-                                <input 
-                                    type="text" 
-                                    id="shiftInput"
-                                    defaultValue={editModal.currentShift}
-                                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-4 font-bold text-slate-800 dark:text-white mb-6 focus:ring-2 focus:ring-blue-500 outline-none"
-                                    placeholder="ex: 9h30 - 17h ou repos"
-                                />
-
+                                <input type="text" id="shiftIn" defaultValue={editModal.curr} className="w-full glass-input rounded-2xl p-5 font-black text-xl mb-8 shadow-inner outline-none focus:ring-4 focus:ring-purple-500/20" placeholder="ex: 10h-18h" />
                                 <div className="flex gap-3">
-                                    <button onClick={() => setEditModal(null)} className="flex-1 py-3 rounded-xl font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">
-                                        Annuler
-                                    </button>
-                                    <button onClick={() => saveException(editModal.dateString, editModal.empName, document.getElementById('shiftInput').value)} className="flex-1 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-                                        Enregistrer
-                                    </button>
+                                    <button onClick={() => setEditModal(null)} className="flex-1 glass py-4 rounded-2xl font-black text-slate-500">Fermer</button>
+                                    <button onClick={() => saveException(editModal.ds, editModal.name, document.getElementById('shiftIn').value)} className="flex-1 bg-gradient-to-br from-purple-600 to-indigo-600 text-white py-4 rounded-2xl font-black shadow-xl shadow-purple-500/30">Enregistrer</button>
                                 </div>
-                                {exceptions[editModal.dateString] && exceptions[editModal.dateString][editModal.empName] && (
-                                    <button onClick={() => resetException(editModal.dateString, editModal.empName)} className="w-full mt-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
-                                        Rétablir l'horaire normal
-                                    </button>
+                                {exceptions[editModal.ds] && exceptions[editModal.ds][editModal.name] && (
+                                    <button onClick={() => resetException(editModal.ds, editModal.name)} className="w-full mt-5 text-red-500 font-black py-3 glass rounded-2xl border border-red-500/20">Réinitialiser l'horaire</button>
                                 )}
                             </div>
                         </div>
                     )}
-
-                    {/* MODAL CHANGEMENT DE PIN VOLONTAIRE */}
-                    {isChangingActivePin && (
-                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                            <div className="bg-white dark:bg-darkcard rounded-3xl w-full max-w-xs p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-center border border-slate-100 dark:border-slate-700">
-                                <div className="mx-auto bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 w-12 h-12 rounded-full flex items-center justify-center mb-4">
-                                    <IconKey />
-                                </div>
-                                <h3 className="text-xl font-bold mb-1 dark:text-white">Modifier mon PIN</h3>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-                                    Choisissez un nouveau code à 4 chiffres.
-                                </p>
-                                
-                                <div className="space-y-3 mb-4">
-                                    <div>
-                                        <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase block text-left mb-1">Nouveau code</label>
-                                        <input 
-                                            type="password" 
-                                            pattern="[0-9]*"
-                                            inputMode="numeric"
-                                            maxLength="4"
-                                            value={activeNewPin}
-                                            onChange={(e) => { setActiveNewPin(e.target.value); setActivePinError(''); }}
-                                            className="w-full text-center text-2xl tracking-[0.3em] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                                            placeholder="••••"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase block text-left mb-1">Confirmer</label>
-                                        <input 
-                                            type="password" 
-                                            pattern="[0-9]*"
-                                            inputMode="numeric"
-                                            maxLength="4"
-                                            value={activeConfirmPin}
-                                            onChange={(e) => { setActiveConfirmPin(e.target.value); setActivePinError(''); }}
-                                            className="w-full text-center text-2xl tracking-[0.3em] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                                            placeholder="••••"
-                                        />
-                                    </div>
-                                </div>
-
-                                {activePinError && <p className="text-red-500 text-xs font-bold mb-4 animate-pulse">{activePinError}</p>}
-                                {!activePinError && <div className="h-4 mb-4"></div>}
-
-                                <div className="flex gap-3 mt-2">
-                                    <button onClick={() => setIsChangingActivePin(false)} className="flex-1 py-3 rounded-xl font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">
-                                        Annuler
-                                    </button>
-                                    <button onClick={submitActivePinChange} className="flex-1 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-                                        Enregistrer
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                 </div>
             );
         }
