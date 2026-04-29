@@ -76,6 +76,9 @@
             background: rgba(255, 255, 255, 0.95) !important;
             border: 2px solid #a18cd1 !important;
             color: #1e293b !important;
+            box-sizing: border-box !important;
+            display: block;
+            width: 100%;
         }
         .dark .glass-input {
             background: rgba(30, 41, 59, 0.98) !important;
@@ -417,7 +420,7 @@
                                     return (
                                         <div key={ds} className={`glass p-5 rounded-[1.5rem] relative border border-white/30 transition-all ${isT ? 'ring-2 ring-purple-500/40 bg-white/70 dark:bg-slate-800/80 shadow-2xl' : ''}`}>
                                             {isT && (
-                                                <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[9px] px-3 py-1 rounded-tr-[1.5rem] rounded-bl-xl font-black uppercase tracking-tighter shadow-md z-10">
+                                                <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[9px] px-3.5 py-1.5 rounded-tr-[1.5rem] rounded-bl-[1.2rem] font-black uppercase tracking-tighter shadow-md z-10">
                                                     Aujourd'hui
                                                 </div>
                                             )}
@@ -478,13 +481,13 @@
                                     <h2 className="text-2xl font-black tracking-tight">Mes Congés</h2>
                                 </div>
                                 <div className="space-y-6">
-                                    <div>
+                                    <div className="flex flex-col">
                                         <label className="text-[10px] font-black uppercase opacity-40 ml-3 mb-2 block tracking-widest">Début de période</label>
-                                        <input type="date" value={vacationStart} onChange={e => setVacationStart(e.target.value)} className="w-full glass-input rounded-2xl p-4 font-black shadow-inner outline-none focus:ring-4 focus:ring-purple-400/20" />
+                                        <input type="date" value={vacationStart} onChange={e => setVacationStart(e.target.value)} className="glass-input rounded-2xl p-4 font-black shadow-inner outline-none focus:ring-4 focus:ring-purple-400/20" />
                                     </div>
-                                    <div>
+                                    <div className="flex flex-col">
                                         <label className="text-[10px] font-black uppercase opacity-40 ml-3 mb-2 block tracking-widest">Fin de période</label>
-                                        <input type="date" value={vacationEnd} onChange={e => setVacationEnd(e.target.value)} className="w-full glass-input rounded-2xl p-4 font-black shadow-inner outline-none focus:ring-4 focus:ring-purple-400/20" />
+                                        <input type="date" value={vacationEnd} onChange={e => setVacationEnd(e.target.value)} className="glass-input rounded-2xl p-4 font-black shadow-inner outline-none focus:ring-4 focus:ring-purple-400/20" />
                                     </div>
                                     <div className="pt-6 space-y-4">
                                         <button onClick={() => handleSetVacation('add')} className="w-full py-5 rounded-[1.25rem] font-black text-white bg-gradient-to-r from-purple-600 to-indigo-600 shadow-2xl shadow-purple-500/20 active:scale-95 transition-transform tracking-tight">Enregistrer mes congés 🌴</button>
@@ -511,8 +514,9 @@
                         )}
                     </main>
 
+                    {/* BARRE DE SAISIE DU CHAT REMONTÉE POUR ÉVITER LE MENU */}
                     {activeTab === 'chat' && (
-                        <div className="fixed bottom-24 left-4 right-4 z-40">
+                        <div className="fixed bottom-[115px] left-4 right-4 z-40">
                             <form onSubmit={handleSendChat} className="glass-strong rounded-[2.5rem] p-2.5 flex items-center gap-3 shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-white/40">
                                 <input type="text" value={newChatMessage} onChange={e => setNewChatMessage(e.target.value)} placeholder="Écrire un message..." className="flex-1 bg-transparent px-5 py-3 font-bold text-slate-900 dark:text-white focus:outline-none placeholder:opacity-40" />
                                 <button type="submit" disabled={!newChatMessage.trim()} className="p-4 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-full shadow-lg active:scale-90 transition-transform disabled:opacity-30 disabled:grayscale"><IconSend /></button>
@@ -520,7 +524,8 @@
                         </div>
                     )}
 
-                    <nav className="fixed bottom-0 left-0 right-0 glass-strong safe-bottom pt-3 pb-safe px-6 flex justify-between shadow-[0_-15px_40px_rgba(0,0,0,0.1)] z-50 border-t border-white/30">
+                    {/* BARRE DE NAVIGATION AVEC MARGE INFÉRIEURE ÉGALE À LA SUPÉRIEURE */}
+                    <nav className="fixed bottom-0 left-0 right-0 glass-strong pt-3 pb-3 px-6 flex justify-between shadow-[0_-15px_40px_rgba(0,0,0,0.1)] z-50 border-t border-white/30">
                         <div className="max-w-md mx-auto w-full flex justify-between gap-2">
                             <button onClick={() => setActiveTab('me')} className={`flex-1 flex flex-col items-center py-3.5 rounded-2xl transition-all ${activeTab === 'me' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
                                 <IconUser /><span className="text-[9px] font-black uppercase mt-1.5 tracking-tighter">Moi</span>
