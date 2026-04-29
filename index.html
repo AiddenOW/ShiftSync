@@ -36,7 +36,7 @@
 
     <style>
         * {
-            box-sizing: border-box;
+            box-sizing: border-box !important;
         }
 
         body {
@@ -80,9 +80,9 @@
             background: rgba(255, 255, 255, 0.95) !important;
             border: 2px solid #a18cd1 !important;
             color: #1e293b !important;
-            box-sizing: border-box !important;
-            display: block;
             width: 100% !important;
+            max-width: 100% !important;
+            display: block;
             appearance: none;
         }
         .dark .glass-input {
@@ -92,15 +92,11 @@
         }
         
         .safe-top { padding-top: env(safe-area-inset-top); }
-        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen">
     <div class="bg-liquid"></div>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-
     <div id="root"></div>
 
     <script>
@@ -337,6 +333,8 @@
                                 ))}
                             </div>
                         </div>
+
+                        {/* RESTAURATION DU MODAL PIN */}
                         {loginModalUser && (
                             <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
                                 <div className="glass-strong rounded-3xl w-full max-w-xs p-8 text-center animate-in zoom-in-95 shadow-2xl border border-white/30">
@@ -486,17 +484,13 @@
                                     <h2 className="text-2xl font-black tracking-tight">Mes Congés</h2>
                                 </div>
                                 <div className="space-y-6 w-full">
-                                    <div className="flex flex-col w-full">
+                                    <div className="flex flex-col w-full overflow-hidden">
                                         <label className="text-[10px] font-black uppercase opacity-40 ml-3 mb-2 block tracking-widest">Début de période</label>
-                                        <div className="w-full">
-                                            <input type="date" value={vacationStart} onChange={e => setVacationStart(e.target.value)} className="glass-input rounded-2xl p-4 font-black shadow-inner outline-none focus:ring-4 focus:ring-purple-400/20 w-full" />
-                                        </div>
+                                        <input type="date" value={vacationStart} onChange={e => setVacationStart(e.target.value)} className="glass-input rounded-2xl p-4 font-black shadow-inner outline-none focus:ring-4 focus:ring-purple-400/20" />
                                     </div>
-                                    <div className="flex flex-col w-full">
+                                    <div className="flex flex-col w-full overflow-hidden">
                                         <label className="text-[10px] font-black uppercase opacity-40 ml-3 mb-2 block tracking-widest">Fin de période</label>
-                                        <div className="w-full">
-                                            <input type="date" value={vacationEnd} onChange={e => setVacationEnd(e.target.value)} className="glass-input rounded-2xl p-4 font-black shadow-inner outline-none focus:ring-4 focus:ring-purple-400/20 w-full" />
-                                        </div>
+                                        <input type="date" value={vacationEnd} onChange={e => setVacationEnd(e.target.value)} className="glass-input rounded-2xl p-4 font-black shadow-inner outline-none focus:ring-4 focus:ring-purple-400/20" />
                                     </div>
                                     <div className="pt-6 space-y-4">
                                         <button onClick={() => handleSetVacation('add')} className="w-full py-5 rounded-[1.25rem] font-black text-white bg-gradient-to-r from-purple-600 to-indigo-600 shadow-2xl shadow-purple-500/20 active:scale-95 transition-transform tracking-tight">Enregistrer mes congés 🌴</button>
@@ -524,7 +518,7 @@
                     </main>
 
                     {activeTab === 'chat' && (
-                        <div className="fixed bottom-[90px] left-4 right-4 z-40">
+                        <div className="fixed bottom-[110px] left-4 right-4 z-40">
                             <form onSubmit={handleSendChat} className="glass-strong rounded-[2.5rem] p-2.5 flex items-center gap-3 shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-white/40">
                                 <input type="text" value={newChatMessage} onChange={e => setNewChatMessage(e.target.value)} placeholder="Écrire un message..." className="flex-1 bg-transparent px-5 py-3 font-bold text-slate-900 dark:text-white focus:outline-none placeholder:opacity-40" />
                                 <button type="submit" disabled={!newChatMessage.trim()} className="p-4 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-full shadow-lg active:scale-90 transition-transform disabled:opacity-30 disabled:grayscale"><IconSend /></button>
@@ -532,23 +526,23 @@
                         </div>
                     )}
 
-                    <nav className="fixed bottom-0 left-0 right-0 glass-strong pt-3 pb-3 px-6 flex justify-between shadow-[0_-15px_40px_rgba(0,0,0,0.1)] z-50 border-t border-white/30">
+                    <nav className="fixed bottom-0 left-0 right-0 glass-strong pt-4 pb-4 px-6 flex justify-between shadow-[0_-15px_40px_rgba(0,0,0,0.1)] z-50 border-t border-white/30">
                         <div className="max-w-md mx-auto w-full flex justify-between gap-2">
-                            <button onClick={() => setActiveTab('me')} className={`flex-1 flex flex-col items-center py-3.5 rounded-2xl transition-all ${activeTab === 'me' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
-                                <IconUser /><span className="text-[9px] font-black uppercase mt-1.5 tracking-tighter">Moi</span>
+                            <button onClick={() => setActiveTab('me')} className={`flex-1 flex flex-col items-center py-3 rounded-2xl transition-all ${activeTab === 'me' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
+                                <IconUser /><span className="text-[9px] font-black uppercase mt-1 tracking-tighter">Moi</span>
                             </button>
-                            <button onClick={() => setActiveTab('team')} className={`flex-1 flex flex-col items-center py-3.5 rounded-2xl transition-all ${activeTab === 'team' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
-                                <IconUsers /><span className="text-[9px] font-black uppercase mt-1.5 tracking-tighter">Équipe</span>
+                            <button onClick={() => setActiveTab('team')} className={`flex-1 flex flex-col items-center py-3 rounded-2xl transition-all ${activeTab === 'team' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
+                                <IconUsers /><span className="text-[9px] font-black uppercase mt-1 tracking-tighter">Équipe</span>
                             </button>
-                            <button onClick={() => setActiveTab('vacances')} className={`flex-1 flex flex-col items-center py-3.5 rounded-2xl transition-all ${activeTab === 'vacances' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
-                                <IconPlane /><span className="text-[9px] font-black uppercase mt-1.5 tracking-tighter">Congés</span>
+                            <button onClick={() => setActiveTab('vacances')} className={`flex-1 flex flex-col items-center py-3 rounded-2xl transition-all ${activeTab === 'vacances' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
+                                <IconPlane /><span className="text-[9px] font-black uppercase mt-1 tracking-tighter">Congés</span>
                             </button>
-                            <button onClick={() => setActiveTab('chat')} className={`flex-1 flex flex-col items-center py-3.5 rounded-2xl transition-all relative ${activeTab === 'chat' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
+                            <button onClick={() => setActiveTab('chat')} className={`flex-1 flex flex-col items-center py-3 rounded-2xl transition-all relative ${activeTab === 'chat' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
                                 <IconMessage />
                                 {hasUnreadChat && (
-                                    <span className="absolute top-3 right-1/4 h-3 w-3 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse shadow-md"></span>
+                                    <span className="absolute top-2 right-1/4 h-3 w-3 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse shadow-md"></span>
                                 )}
-                                <span className="text-[9px] font-black uppercase mt-1.5 tracking-tighter">Chat</span>
+                                <span className="text-[9px] font-black uppercase mt-1 tracking-tighter">Chat</span>
                             </button>
                         </div>
                     </nav>
@@ -558,7 +552,7 @@
                             <div className="glass-strong rounded-[3rem] p-10 w-full max-w-xs text-center border border-white/30 shadow-2xl">
                                 <h3 className="font-black text-2xl mb-8 text-purple-700 dark:text-purple-300 tracking-tight">Modifier PIN</h3>
                                 <div className="space-y-4 mb-8">
-                                    <input type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" value={activeNewPin} onChange={e => setActiveNewPin(e.target.value)} className="w-full glass-input rounded-2xl p-5 font-black text-center text-3xl shadow-inner outline-none focus:ring-4 focus:ring-purple-500/20" placeholder="PIN" />
+                                    <input type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" value={activeNewPin} onChange={e => setActiveNewPin(target.value)} className="w-full glass-input rounded-2xl p-5 font-black text-center text-3xl shadow-inner outline-none focus:ring-4 focus:ring-purple-500/20" placeholder="PIN" />
                                     <input type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" value={activeConfirmPin} onChange={e => setActiveConfirmPin(e.target.value)} className="w-full glass-input rounded-2xl p-5 font-black text-center text-3xl shadow-inner outline-none focus:ring-4 focus:ring-purple-500/20" placeholder="Confirmer" />
                                 </div>
                                 {activePinError && <p className="text-red-500 text-xs font-bold mb-4">{activePinError}</p>}
