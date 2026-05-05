@@ -263,8 +263,7 @@
                 try {
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
-                        // Utilisation de ta clé VAPID réelle
-                        const token = await messaging.getToken({ vapidKey: 'BBapNAxtNHoKj69sA0UdxRb4cx0TY_QYHaVo0jn8NKQQdXnXQt60IVM_8dnkTq5JXriOtCOmIps1c8Vbx1SRs1M' });
+                        const token = await messaging.getToken();
                         if (token) {
                             await db.collection('users').doc(employee).set({ pushToken: token }, { merge: true });
                             showToast("Notifications activées !");
