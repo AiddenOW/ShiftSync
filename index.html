@@ -29,6 +29,7 @@
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -119,6 +120,25 @@
         };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const messaging = firebase.messaging();
+const VAPID_KEY = 'BLHGKpScvIp9zZvokeh_8Ijh9wG8WWeQ_A6pxLQswAHTKX2KbkwVOO98Yygg0UYfFR93iCG3O8_APx7fwYe0-js'; // La clé de l'étape 1
+
+// Enregistrer le Service Worker avec le bon scope
+async function registerSW() {
+    if ('serviceWorker' in navigator) {
+        try {
+            const reg = await navigator.serviceWorker.register(
+                '/ShiftSync/firebase-messaging-sw.js',
+                { scope: '/ShiftSync/' }
+            );
+            console.log('SW enregistré :', reg.scope);
+            return reg;
+        } catch (err) {
+            console.error('Erreur SW :', err);
+        }
+    }
+}
+registerSW();
     </script>
 
     <script type="text/babel">
@@ -289,6 +309,54 @@
                 else document.documentElement.classList.remove('dark');
                 localStorage.setItem('shiftsync_theme', isDarkMode ? 'dark' : 'light');
             }, [isDarkMode]);
+
+            // Notifications push
+useEffect(() => {
+    if (!employee) return; // Pas connecté, on ne fait rien
+
+    const setupNotifications = async () => {
+        try {
+            // Demander la permission (déclenche la popup système)
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                console.log('Permission refusée');
+                return;
+            }
+
+            // Récupérer le token FCM de cet appareil
+            const swReg = await navigator.serviceWorker.ready;
+            const token = await messaging.getToken({
+                vapidKey: VAPID_KEY,
+                serviceWorkerRegistration: swReg
+            });
+
+            if (token) {
+                // Sauvegarder le token dans Firestore avec l'identité de l'employé
+                await db.collection('fcm_tokens').doc(token).set({
+                    token,
+                    userId: employee,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log('Token FCM enregistré pour', employee);
+            }
+        } catch (err) {
+            console.error('Erreur notification :', err);
+        }
+    };
+
+    setupNotifications();
+
+    // Gérer les notifications quand l'app est au premier plan
+    const unsubForeground = messaging.onMessage((payload) => {
+        // Si on est dans le chat et que c'est un message → pas besoin de notif visuelle
+        if (activeTab === 'chat' && payload.data?.type === 'chat') return;
+
+        // Sinon, afficher un toast dans l'app
+        showToast(`💬 ${payload.notification.title}: ${payload.notification.body}`);
+    });
+
+    return () => unsubForeground();
+}, [employee]); // Se déclenche quand l'utilisateur se connecte
 
             // Scroll chat auto
             useEffect(() => {
