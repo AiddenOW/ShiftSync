@@ -333,7 +333,7 @@ useEffect(() => {
 
             if (token) {
                 // Sauvegarder le token dans Firestore avec l'identité de l'employé
-                await db.collection('fcm_tokens').doc(token).set({
+                await db.collection('fcmTokens').doc(employee).set({
                     token,
                     userId: employee,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
