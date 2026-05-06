@@ -1,0 +1,15 @@
+{
+  "name": "ShiftSync",
+  "short_name": "ShiftSync",
+  "start_url": "/ShiftSync/",
+  "display": "standalone",
+  "background_color": "#e0c3fc",
+  "theme_color": "#a18cd1",
+  "icons": [
+    {
+      "src": "/ShiftSync/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
