@@ -22,11 +22,11 @@ async function getTokensExcept(excludeUserId) {
 }
 
 /**
- * Envoie des notifications push par batch (data-only).
- * @param {string[]} tokens - Les tokens FCM destinataires.
- * @param {string} title - Titre de la notification.
- * @param {string} body - Corps de la notification.
- * @param {Object} data - Données supplémentaires.
+ * Envoie des notifications push.
+ * @param {string[]} tokens - Les tokens FCM.
+ * @param {string} title - Titre.
+ * @param {string} body - Corps.
+ * @param {Object} data - Données.
  * @return {Promise<void>}
  */
 async function sendNotifications(tokens, title, body, data = {}) {
@@ -39,10 +39,31 @@ async function sendNotifications(tokens, title, body, data = {}) {
 
   for (const chunk of chunks) {
     const message = {
-      data: {title, body, ...data},
+      notification: {title, body},
+      data: {...data, title, body},
       webpush: {
+        headers: {"Urgency": "high"},
+        notification: {
+          title,
+          body,
+          icon: "https://aiddenow.github.io/ShiftSync/icon-192.png",
+          badge: "https://aiddenow.github.io/ShiftSync/icon-192.png",
+          renotify: false,
+          tag: "shiftsync-notif",
+        },
         fcmOptions: {
           link: "https://aiddenow.github.io/ShiftSync/",
+        },
+      },
+      apns: {
+        headers: {"apns-priority": "10"},
+        payload: {
+          aps: {
+            alert: {title, body},
+            sound: "default",
+            badge: 1,
+            "content-available": 1,
+          },
         },
       },
       tokens: chunk,
@@ -51,7 +72,6 @@ async function sendNotifications(tokens, title, body, data = {}) {
     try {
       const result = await messaging.sendEachForMulticast(message);
       console.log(`Envoyé: ${result.successCount} ok, ${result.failureCount} échecs`);
-
       result.responses.forEach((resp, idx) => {
         if (!resp.success) {
           const code = resp.error && resp.error.code;
@@ -115,7 +135,6 @@ exports.onScheduleChange = onDocumentWritten(
     const title = "🗓️ Planning modifié";
     const body = `${changedEmployee} — ${dateFormatted} : ${newShift}`;
 
-    // Exclure la personne qui a fait la modification
     const tokens = await getTokensExcept(changedEmployee);
     await sendNotifications(tokens, title, body, {type: "schedule", date: dateString, sender: changedEmployee});
   }

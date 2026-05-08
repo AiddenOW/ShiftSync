@@ -1,4 +1,4 @@
-// firebase-messaging-sw.js
+// v5
 importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js');
 
@@ -11,21 +11,8 @@ firebase.initializeApp({
     appId: "1:17662196576:web:a6d098f307ea708f17bc05"
 });
 
-const messaging = firebase.messaging();
+firebase.messaging();
 
-// Afficher la notification quand l'appli est en arrière-plan
-messaging.onBackgroundMessage((payload) => {
-    const { title, body, icon } = payload.notification;
-    self.registration.showNotification(title, {
-        body,
-        icon: icon || '/ShiftSync/icon-192.png',
-        badge: '/ShiftSync/icon-192.png',
-        vibrate: [200, 100, 200],
-        data: payload.data
-    });
-});
-
-// Clic sur la notification → ouvre l'app
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     event.waitUntil(
