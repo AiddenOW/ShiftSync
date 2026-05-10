@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ShiftSync</title>
 
-```
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ShiftSync">
@@ -104,7 +103,6 @@
         transition: all 0.2s;
     }
 </style>
-```
 
 </head>
 <body class="text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen">
@@ -112,7 +110,6 @@
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
 
-```
 <div id="root"></div>
 
 <script>
@@ -127,7 +124,6 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const messaging = firebase.messaging();
-```
 
 const VAPID_KEY = ‘BLHGKpScvIp9zZvokeh_8Ijh9wG8WWeQ_A6pxLQswAHTKX2KbkwVOO98Yygg0UYfFR93iCG3O8_APx7fwYe0-js’; // La clé de l’étape 1
 
@@ -149,7 +145,6 @@ console.error(‘Erreur SW :’, err);
 registerSW();
 </script>
 
-```
 <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
@@ -323,12 +318,10 @@ registerSW();
         }, [isDarkMode]);
 
         // Notifications push
-```
 
 useEffect(() => {
 if (!employee) return; // Pas connecté, on ne fait rien
 
-```
 const setupNotifications = async () => {
     try {
         // Demander la permission (déclenche la popup système)
@@ -371,11 +364,9 @@ const unsubForeground = messaging.onMessage((payload) => {
 });
 
 return () => unsubForeground();
-```
 
 }, [employee]); // Se déclenche quand l’utilisateur se connecte
 
-```
         // Scroll chat auto
         useEffect(() => {
             if (activeTab === 'chat' && chatMessages.length > 0) {
@@ -968,7 +959,6 @@ return () => unsubForeground();
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
 </script>
-```
 
 </body>
 </html>
