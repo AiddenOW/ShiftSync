@@ -86,7 +86,6 @@ badge: 1,
 tokens: chunk,
 };
 
-```
 try {
   const result = await messaging.sendEachForMulticast(message);
   console.log(`Envoyé: ${result.successCount} ok, ${result.failureCount} échecs`);
@@ -104,7 +103,6 @@ try {
 } catch (err) {
   console.error("Erreur envoi FCM :", err);
 }
-```
 
 }
 }
@@ -116,7 +114,6 @@ async (event) => {
 const message = event.data.data();
 if (!message || !message.text || !message.sender) return;
 
-```
 const mentions = message.mentions || [];
 let tokens;
 
@@ -140,7 +137,6 @@ await sendNotifications(tokens, title, body, {
   type: "chat",
   sender: message.sender,
 });
-```
 
 }
 );
@@ -153,7 +149,6 @@ const dateString = event.params.dateString;
 const before = event.data.before.exists ? event.data.before.data() : {};
 const after = event.data.after.exists ? event.data.after.data() : {};
 
-```
 let changedEmployee = null;
 for (const emp of Object.keys(after)) {
   if (after[emp] !== before[emp]) {
@@ -181,7 +176,6 @@ await sendNotifications(tokens, title, body, {
   date: dateString,
   sender: changedEmployee,
 });
-```
 
 }
 );
