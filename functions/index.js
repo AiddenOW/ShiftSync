@@ -22,6 +22,21 @@ async function getTokensExcept(excludeUserId) {
 }
 
 /**
+ * Récupère les tokens FCM pour une liste d'utilisateurs spécifiques.
+ * @param {string[]} userIds - Les utilisateurs à notifier.
+ * @param {string} excludeUserId - L'utilisateur à exclure (expéditeur).
+ * @return {Promise<string[]>} Liste des tokens.
+ */
+async function getTokensForUsers(userIds, excludeUserId) {
+  const snap = await db.collection("fcmTokens").get();
+  return snap.docs
+    .map((d) => d.data())
+    .filter((d) => userIds.includes(d.userId) && d.userId !== excludeUserId)
+    .map((d) => d.token)
+    .filter(Boolean);
+}
+
+/**
  * Envoie des notifications push.
  * @param {string[]} tokens - Les tokens FCM.
  * @param {string} title - Titre.
@@ -48,7 +63,6 @@ async function sendNotifications(tokens, title, body, data = {}) {
           body,
           icon: "https://aiddenow.github.io/ShiftSync/icon-192.png",
           badge: "https://aiddenow.github.io/ShiftSync/icon-192.png",
-          renotify: false,
           tag: "shiftsync-notif",
         },
         fcmOptions: {
@@ -96,13 +110,29 @@ exports.onNewChatMessage = onDocumentCreated(
     const message = event.data.data();
     if (!message || !message.text || !message.sender) return;
 
-    const tokens = await getTokensExcept(message.sender);
+    const mentions = message.mentions || [];
+    let tokens;
+
+    if (mentions.length > 0) {
+      // Message avec @mention → notifier uniquement les personnes mentionnées
+      console.log(`Mentions détectées: ${mentions.join(", ")}`);
+      tokens = await getTokensForUsers(mentions, message.sender);
+    } else {
+      // Message sans mention → notifier tout le monde sauf l'expéditeur
+      tokens = await getTokensExcept(message.sender);
+    }
+
+    if (tokens.length === 0) return;
+
     const title = `💬 ${message.sender}`;
     const body = message.text.length > 100
       ? message.text.substring(0, 97) + "..."
       : message.text;
 
-    await sendNotifications(tokens, title, body, {type: "chat", sender: message.sender});
+    await sendNotifications(tokens, title, body, {
+      type: "chat",
+      sender: message.sender,
+    });
   }
 );
 
@@ -136,6 +166,10 @@ exports.onScheduleChange = onDocumentWritten(
     const body = `${changedEmployee} — ${dateFormatted} : ${newShift}`;
 
     const tokens = await getTokensExcept(changedEmployee);
-    await sendNotifications(tokens, title, body, {type: "schedule", date: dateString, sender: changedEmployee});
+    await sendNotifications(tokens, title, body, {
+      type: "schedule",
+      date: dateString,
+      sender: changedEmployee,
+    });
   }
 );

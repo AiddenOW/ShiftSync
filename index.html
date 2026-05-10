@@ -291,8 +291,10 @@ registerSW();
             const [isEditingMessage, setIsEditingMessage] = useState(null); 
             const [editMessageValue, setEditMessageValue] = useState('');
             const [messageContextMenu, setMessageContextMenu] = useState(null); 
+            const [mentionSuggestions, setMentionSuggestions] = useState([]);
             const longPressTimer = useRef(null);
             const touchStartPos = useRef({ x: 0, y: 0 });
+            const chatInputRef = useRef(null);
 
             // Interface & Données
             const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -401,28 +403,6 @@ useEffect(() => {
             // Handlers
             const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
             const handleLogout = () => { setEmployee(null); localStorage.removeItem('shiftsync_profile'); };
-
-            const shareWeekSchedule = () => {
-                const monday = getMonday(currentViewDate);
-                let text = `📅 Planning de ${employee} — semaine du ${monday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}\n\n`;
-                for (let i = 0; i < 7; i++) {
-                    const date = new Date(monday);
-                    date.setUTCDate(monday.getUTCDate() + i);
-                    const shift = getShiftForDate(date, employee);
-                    const dayName = DAYS_OF_WEEK[i];
-                    const dayLabel = dayName.charAt(0).toUpperCase() + dayName.slice(1);
-                    const dateLabel = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-                    const emoji = shift.toLowerCase().includes('repos') ? '😴' : shift.toLowerCase().includes('cong') ? '🌴' : '⏰';
-                    text += `${emoji} ${dayLabel} ${dateLabel} : ${shift}\n`;
-                }
-                text += `\n🔗 aiddenow.github.io/ShiftSync/`;
-                if (navigator.share) {
-                    navigator.share({ text });
-                } else {
-                    navigator.clipboard.writeText(text);
-                    showToast('Planning copié dans le presse-papier !');
-                }
-            };
             
             const handlePinSubmit = () => {
                 const exp = employeePins[loginModalUser] || '0000';
@@ -464,24 +444,81 @@ useEffect(() => {
                 batch.commit().then(() => { showToast("Calendrier mis à jour"); setVacationStart(''); setVacationEnd(''); });
             };
 
+            // --- Mentions ---
+            const extractMentions = (text) => {
+                const mentions = [];
+                EMPLOYEES.forEach(emp => {
+                    if (text.includes('@' + emp) && !mentions.includes(emp)) mentions.push(emp);
+                });
+                return mentions;
+            };
+
+            const handleChatInput = (e) => {
+                const val = e.target.value;
+                setNewChatMessage(val);
+                const lastAt = val.lastIndexOf('@');
+                if (lastAt !== -1) {
+                    const query = val.slice(lastAt + 1);
+                    if (!query.includes(' ')) {
+                        const filtered = EMPLOYEES.filter(emp =>
+                            emp.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+                               .startsWith(query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''))
+                            && emp !== employee
+                        );
+                        setMentionSuggestions(filtered);
+                        return;
+                    }
+                }
+                setMentionSuggestions([]);
+            };
+
+            const insertMention = (name) => {
+                const lastAt = newChatMessage.lastIndexOf('@');
+                const newVal = newChatMessage.slice(0, lastAt) + '@' + name + ' ';
+                setNewChatMessage(newVal);
+                setMentionSuggestions([]);
+                chatInputRef.current?.focus();
+            };
+
+            const renderMessageText = (text) => {
+                if (!text) return null;
+                const sorted = [...EMPLOYEES].sort((a, b) => b.length - a.length);
+                const pattern = sorted.map(e => '@' + e.replace(/[-]/g, '\\$&')).join('|');
+                const regex = new RegExp('(' + pattern + ')', 'g');
+                const parts = text.split(regex);
+                return parts.map((part, i) => {
+                    const isMe = part === '@' + employee;
+                    const isMention = EMPLOYEES.some(e => part === '@' + e);
+                    if (isMention) {
+                        return React.createElement('span', {key: i, style: {fontWeight:'900', color: isMe ? '#d97706' : '#a78bfa'}}, part);
+                    }
+                    return part;
+                });
+            };
+
             // --- Chat Logic ---
             const handleSendChat = async (e) => {
-                e.preventDefault(); 
+                e.preventDefault();
                 if (!newChatMessage.trim()) return;
-                
+                const text = newChatMessage.trim();
                 if (isEditingMessage) {
-                    await db.collection('chat').doc(isEditingMessage).update({ text: newChatMessage.trim(), edited: true });
+                    await db.collection('chat').doc(isEditingMessage).update({ text, edited: true });
                     setIsEditingMessage(null);
                 } else {
-                    await db.collection('chat').add({ text: newChatMessage.trim(), sender: employee, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                    const mentions = extractMentions(text);
+                    await db.collection('chat').add({
+                        text,
+                        sender: employee,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        mentions: mentions.length > 0 ? mentions : []
+                    });
                 }
                 setNewChatMessage('');
+                setMentionSuggestions([]);
             };
 
             const handleLongPress = (msg) => {
-                if (msg.sender === employee) {
-                    setMessageContextMenu(msg);
-                }
+                setMessageContextMenu(msg);
             };
 
             const startPress = (msg, e) => {
@@ -635,10 +672,6 @@ useEffect(() => {
                             <div className="space-y-4 animate-in fade-in duration-300">
                                 <div className="flex justify-between items-center px-2">
                                     <div className="glass-strong px-5 py-2.5 rounded-2xl font-black shadow-sm text-purple-700 dark:text-purple-300 border border-purple-200/50">Total : {totalW.toFixed(1)}h</div>
-                                    <button onClick={shareWeekSchedule} className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-purple-500/20 active:scale-95 transition-all text-sm">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                                        Partager
-                                    </button>
                                 </div>
                                 {wD.map(({ d, dt, ds, s }) => {
                                     const isT = ds === todayStr; const isO = s.toLowerCase().includes('repos') || s.toLowerCase().includes('cong');
@@ -778,7 +811,7 @@ useEffect(() => {
                                         <span className="text-[9px] font-black opacity-40 px-3 uppercase tracking-widest mb-1">{m.sender}</span>
                                         <div className={`max-w-[85%] rounded-[1.75rem] px-5 py-3.5 shadow-lg border border-white/20 transition-all ${m.sender === employee ? 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-br-sm' : 'glass-strong rounded-bl-sm font-semibold text-slate-800 dark:text-white'}`}>
                                             <p className="leading-relaxed">
-                                                {m.text}
+                                                {renderMessageText(m.text)}
                                                 {m.edited && <span className="text-[9px] opacity-40 ml-2 italic font-black">modifié</span>}
                                             </p>
                                         </div>
@@ -804,8 +837,20 @@ useEffect(() => {
                                         <button onClick={() => { setIsEditingMessage(null); setNewChatMessage(''); }} className="uppercase tracking-widest">Annuler</button>
                                     </div>
                                 )}
+                                {/* Suggestions @mention */}
+                                {mentionSuggestions.length > 0 && (
+                                    <div className="glass-strong rounded-2xl mb-2 overflow-hidden shadow-xl border border-white/30 animate-in slide-in-from-bottom-2">
+                                        {mentionSuggestions.map(name => (
+                                            <button key={name} onClick={() => insertMention(name)}
+                                                className="w-full text-left px-4 py-3 font-black hover:bg-purple-50 dark:hover:bg-purple-900/20 flex items-center gap-3 transition-colors active:bg-purple-100 border-b border-white/10 last:border-0">
+                                                <span className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/40 dark:to-indigo-900/40 text-purple-700 dark:text-purple-300 flex items-center justify-center font-black text-sm flex-shrink-0">{name.charAt(0)}</span>
+                                                <span className="text-purple-700 dark:text-purple-300">@{name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                                 <form onSubmit={handleSendChat} className={`glass-strong ${isEditingMessage ? 'rounded-b-[2.5rem]' : 'rounded-[2.5rem]'} p-2.5 flex items-center gap-3 shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-white/40`}>
-                                    <input type="text" value={newChatMessage} onChange={e => setNewChatMessage(e.target.value)} placeholder="Écrire un message..." className="flex-1 bg-transparent px-5 py-3 font-bold text-slate-900 dark:text-white focus:outline-none placeholder:opacity-40" />
+                                    <input ref={chatInputRef} type="text" value={newChatMessage} onChange={handleChatInput} placeholder="Écrire… (@mention)" className="flex-1 bg-transparent px-5 py-3 font-bold text-slate-900 dark:text-white focus:outline-none placeholder:opacity-40" />
                                     <button type="submit" disabled={!newChatMessage.trim()} className={`p-4 ${isEditingMessage ? 'bg-orange-500' : 'bg-gradient-to-br from-purple-600 to-indigo-600'} text-white rounded-full shadow-lg active:scale-90 transition-transform disabled:opacity-30 disabled:grayscale`}>
                                         {isEditingMessage ? <IconEdit /> : <IconSend />}
                                     </button>
@@ -837,26 +882,29 @@ useEffect(() => {
 
                     {/* MENU CONTEXTUEL MESSAGE (Appui long) */}
                     {messageContextMenu && (
-                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4">
-                            <div className="w-full max-w-sm glass-strong rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 animate-in slide-in-from-bottom-full duration-300">
-                                <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-full mx-auto mb-6 sm:hidden"></div>
-                                <h3 className="text-center font-black text-xl mb-6 tracking-tight">Gérer mon message</h3>
-                                
-                                <div className="p-4 glass rounded-2xl mb-6 italic text-sm opacity-70 border border-white/20">
+                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setMessageContextMenu(null)}>
+                            <div className="w-full max-w-sm glass-strong rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 animate-in slide-in-from-bottom-full duration-300" onClick={e => e.stopPropagation()}>
+                                <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-full mx-auto mb-4 sm:hidden"></div>
+
+                                {/* Aperçu du message */}
+                                <div className="p-3 glass rounded-2xl mb-5 italic text-sm opacity-70 border border-white/20 truncate">
                                     "{messageContextMenu.text}"
                                 </div>
 
-                                <div className="space-y-3">
-                                    <button onClick={() => startEditMessage(messageContextMenu)} className="w-full flex items-center justify-center gap-3 py-4 bg-purple-600 text-white rounded-2xl font-black shadow-lg shadow-purple-500/20 active:scale-95 transition-all">
-                                        <IconEdit /> Modifier le message
-                                    </button>
-                                    <button onClick={() => deleteMessage(messageContextMenu.id)} className="w-full flex items-center justify-center gap-3 py-4 bg-red-500 text-white rounded-2xl font-black shadow-lg shadow-red-500/20 active:scale-95 transition-all">
-                                        <IconTrash /> Supprimer définitivement
-                                    </button>
-                                    <button onClick={() => setMessageContextMenu(null)} className="w-full py-4 glass text-slate-500 rounded-2xl font-black active:scale-95 transition-all">
-                                        Fermer
-                                    </button>
-                                </div>
+                                {/* Options edit/delete seulement pour ses propres messages */}
+                                {messageContextMenu.sender === employee && (
+                                    <div className="space-y-3">
+                                        <button onClick={() => startEditMessage(messageContextMenu)} className="w-full flex items-center justify-center gap-3 py-4 bg-purple-600 text-white rounded-2xl font-black shadow-lg shadow-purple-500/20 active:scale-95 transition-all">
+                                            <IconEdit /> Modifier le message
+                                        </button>
+                                        <button onClick={() => deleteMessage(messageContextMenu.id)} className="w-full flex items-center justify-center gap-3 py-4 bg-red-500 text-white rounded-2xl font-black shadow-lg shadow-red-500/20 active:scale-95 transition-all">
+                                            <IconTrash /> Supprimer définitivement
+                                        </button>
+                                    </div>
+                                )}
+                                <button onClick={() => setMessageContextMenu(null)} className="w-full py-4 glass text-slate-500 rounded-2xl font-black active:scale-95 transition-all mt-3">
+                                    Fermer
+                                </button>
                             </div>
                         </div>
                     )}
