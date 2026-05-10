@@ -31,6 +31,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -122,6 +123,7 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const messaging = firebase.messaging();
+        const storage = firebase.storage();
 const VAPID_KEY = 'BLHGKpScvIp9zZvokeh_8Ijh9wG8WWeQ_A6pxLQswAHTKX2KbkwVOO98Yygg0UYfFR93iCG3O8_APx7fwYe0-js'; // La clé de l'étape 1
 
 // Enregistrer le Service Worker avec le bon scope
@@ -294,7 +296,9 @@ registerSW();
             const longPressTimer = useRef(null);
             const touchStartPos = useRef({ x: 0, y: 0 });
             const chatInputRef = useRef(null);
+            const fileInputRef = useRef(null);
             const [mentionSuggestions, setMentionSuggestions] = useState([]);
+            const [uploadProgress, setUploadProgress] = useState(null);
 
             // Interface & Données
             const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -460,6 +464,61 @@ useEffect(() => {
                 batch.commit().then(() => { showToast("Calendrier mis à jour"); setVacationStart(''); setVacationEnd(''); });
             };
 
+            // --- Media Upload ---
+            const compressImage = (file) => new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const MAX = 1024;
+                    let w = img.width, h = img.height;
+                    if (w > h && w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+                    else if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    canvas.toBlob(resolve, 'image/jpeg', 0.8);
+                    URL.revokeObjectURL(img.src);
+                };
+                img.src = URL.createObjectURL(file);
+            });
+
+            const handleFileUpload = async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const isImage = file.type.startsWith('image/');
+                const isVideo = file.type.startsWith('video/');
+                if (!isImage && !isVideo) { showToast('Format non supporté'); return; }
+                if (isImage && file.size > 10 * 1024 * 1024) { showToast('Image trop lourde (max 10MB)'); return; }
+                if (isVideo && file.size > 50 * 1024 * 1024) { showToast('Vidéo trop lourde (max 50MB)'); return; }
+                try {
+                    setUploadProgress(0);
+                    let uploadFile = isImage ? await compressImage(file) : file;
+                    const ext = isImage ? 'jpg' : (file.name.split('.').pop() || 'mp4');
+                    const fileName = `chat/${Date.now()}_${employee.replace(/\s/g,'_')}.${ext}`;
+                    const ref = storage.ref().child(fileName);
+                    const task = ref.put(uploadFile);
+                    task.on('state_changed', (snap) => {
+                        setUploadProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100));
+                    });
+                    await task;
+                    const url = await ref.getDownloadURL();
+                    await db.collection('chat').add({
+                        text: '',
+                        sender: employee,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        mediaUrl: url,
+                        mediaType: isImage ? 'image' : 'video',
+                        storagePath: fileName
+                    });
+                    setUploadProgress(null);
+                    showToast(isImage ? '📷 Photo envoyée !' : '🎥 Vidéo envoyée !');
+                } catch (err) {
+                    console.error('Upload error:', err);
+                    showToast("Erreur lors de l'envoi");
+                    setUploadProgress(null);
+                }
+                e.target.value = '';
+            };
+
             // --- Mentions ---
             const extractMentions = (text) => {
                 const mentions = [];
@@ -555,6 +614,11 @@ useEffect(() => {
             };
 
             const deleteMessage = async (id) => {
+                const msgSnap = await db.collection('chat').doc(id).get();
+                const msgData = msgSnap.data();
+                if (msgData?.storagePath) {
+                    try { await storage.ref().child(msgData.storagePath).delete(); } catch(e) {}
+                }
                 await db.collection('chat').doc(id).delete();
                 setMessageContextMenu(null);
                 showToast("Message supprimé");
@@ -829,11 +893,21 @@ useEffect(() => {
                                          onMouseLeave={stopPress}
                                     >
                                         <span className="text-[9px] font-black opacity-40 px-3 uppercase tracking-widest mb-1">{m.sender}</span>
-                                        <div className={`max-w-[85%] rounded-[1.75rem] px-5 py-3.5 shadow-lg border border-white/20 transition-all ${m.sender === employee ? 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-br-sm' : 'glass-strong rounded-bl-sm font-semibold text-slate-800 dark:text-white'}`}>
-                                            <p className="leading-relaxed">
-                                                {renderMessageText(m.text)}
-                                                {m.edited && <span className="text-[9px] opacity-40 ml-2 italic font-black">modifié</span>}
-                                            </p>
+                                        <div className={`max-w-[85%] rounded-[1.75rem] shadow-lg border border-white/20 transition-all overflow-hidden ${m.sender === employee ? 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-br-sm' : 'glass-strong rounded-bl-sm font-semibold text-slate-800 dark:text-white'}`}>
+                                            {m.mediaUrl && m.mediaType === 'image' && (
+                                                <img src={m.mediaUrl} alt="photo" className="w-full max-w-[280px] block" style={{maxHeight:'300px', objectFit:'cover'}} onClick={() => window.open(m.mediaUrl, '_blank')} />
+                                            )}
+                                            {m.mediaUrl && m.mediaType === 'video' && (
+                                                <video src={m.mediaUrl} controls playsInline className="w-full max-w-[280px] block" style={{maxHeight:'300px'}} />
+                                            )}
+                                            {m.text ? (
+                                                <p className="leading-relaxed px-5 py-3.5">
+                                                    {renderMessageText(m.text)}
+                                                    {m.edited && <span className="text-[9px] opacity-40 ml-2 italic font-black">modifié</span>}
+                                                </p>
+                                            ) : m.edited ? (
+                                                <p className="px-5 pb-2 text-[9px] opacity-40 italic font-black">modifié</p>
+                                            ) : null}
                                         </div>
                                         {/* HORODATAGE DISCRET */}
                                         <span className="text-[9px] font-bold opacity-30 px-3 mt-1 tracking-wider">
@@ -868,9 +942,21 @@ useEffect(() => {
                                         ))}
                                     </div>
                                 )}
-                                <form onSubmit={handleSendChat} className={`glass-strong ${isEditingMessage ? 'rounded-b-[2.5rem]' : 'rounded-[2.5rem]'} p-2.5 flex items-center gap-3 shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-white/40`}>
-                                    <input ref={chatInputRef} type="text" value={newChatMessage} onChange={handleChatInput} placeholder="Écrire… (@mention)" className="flex-1 bg-transparent px-5 py-3 font-bold text-slate-900 dark:text-white focus:outline-none placeholder:opacity-40" />
-                                    <button type="submit" disabled={!newChatMessage.trim()} className={`p-4 ${isEditingMessage ? 'bg-orange-500' : 'bg-gradient-to-br from-purple-600 to-indigo-600'} text-white rounded-full shadow-lg active:scale-90 transition-transform disabled:opacity-30 disabled:grayscale`}>
+                                {uploadProgress !== null && (
+                                    <div className="glass-strong rounded-t-2xl px-5 py-2 flex items-center gap-3 border border-white/30">
+                                        <div className="flex-1 bg-slate-200/50 dark:bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
+                                            <div className="bg-gradient-to-r from-purple-500 to-indigo-500 h-1.5 rounded-full transition-all duration-300" style={{width: uploadProgress + '%'}}></div>
+                                        </div>
+                                        <span className="text-[10px] font-black text-purple-600 dark:text-purple-300">{uploadProgress}%</span>
+                                    </div>
+                                )}
+                                <form onSubmit={handleSendChat} className={`glass-strong ${isEditingMessage || uploadProgress !== null ? 'rounded-b-[2.5rem]' : 'rounded-[2.5rem]'} p-2 flex items-center gap-2 shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-white/40`}>
+                                    <input ref={fileInputRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleFileUpload} />
+                                    <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploadProgress !== null} className="p-3 opacity-40 hover:opacity-80 active:scale-90 transition-all flex-shrink-0 disabled:opacity-20">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                                    </button>
+                                    <input ref={chatInputRef} type="text" value={newChatMessage} onChange={handleChatInput} placeholder="Écrire… (@mention)" className="flex-1 bg-transparent px-3 py-3 font-bold text-slate-900 dark:text-white focus:outline-none placeholder:opacity-40 min-w-0" />
+                                    <button type="submit" disabled={!newChatMessage.trim()} className={`p-3.5 ${isEditingMessage ? 'bg-orange-500' : 'bg-gradient-to-br from-purple-600 to-indigo-600'} text-white rounded-full shadow-lg active:scale-90 transition-transform disabled:opacity-30 disabled:grayscale flex-shrink-0`}>
                                         {isEditingMessage ? <IconEdit /> : <IconSend />}
                                     </button>
                                 </form>

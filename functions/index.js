@@ -6,10 +6,13 @@ admin.initializeApp();
 
 const db = admin.firestore();
 const messaging = admin.messaging();
+const bucket = admin.storage().bucket();
+
+const MAX_MESSAGES = 50;
 
 /**
- * Récupère tous les tokens FCM sauf celui de l'expéditeur.
- * @param {string} excludeUserId - L'utilisateur à exclure.
+ * Recupere tous les tokens FCM sauf celui de l'expediteur.
+ * @param {string} excludeUserId - L'utilisateur a exclure.
  * @return {Promise<string[]>} Liste des tokens.
  */
 async function getTokensExcept(excludeUserId) {
@@ -22,9 +25,9 @@ async function getTokensExcept(excludeUserId) {
 }
 
 /**
- * Récupère les tokens FCM pour une liste d'utilisateurs spécifiques.
- * @param {string[]} userIds - Les utilisateurs à notifier.
- * @param {string} excludeUserId - L'utilisateur à exclure (expéditeur).
+ * Recupere les tokens FCM pour une liste d'utilisateurs specifiques.
+ * @param {string[]} userIds - Les utilisateurs a notifier.
+ * @param {string} excludeUserId - L'utilisateur a exclure.
  * @return {Promise<string[]>} Liste des tokens.
  */
 async function getTokensForUsers(userIds, excludeUserId) {
@@ -41,7 +44,7 @@ async function getTokensForUsers(userIds, excludeUserId) {
  * @param {string[]} tokens - Les tokens FCM.
  * @param {string} title - Titre.
  * @param {string} body - Corps.
- * @param {Object} data - Données.
+ * @param {Object} data - Donnees.
  * @return {Promise<void>}
  */
 async function sendNotifications(tokens, title, body, data = {}) {
@@ -65,9 +68,7 @@ async function sendNotifications(tokens, title, body, data = {}) {
           badge: "https://aiddenow.github.io/ShiftSync/icon-192.png",
           tag: "shiftsync-notif",
         },
-        fcmOptions: {
-          link: "https://aiddenow.github.io/ShiftSync/",
-        },
+        fcmOptions: {link: "https://aiddenow.github.io/ShiftSync/"},
       },
       apns: {
         headers: {"apns-priority": "10"},
@@ -85,7 +86,7 @@ async function sendNotifications(tokens, title, body, data = {}) {
 
     try {
       const result = await messaging.sendEachForMulticast(message);
-      console.log(`Envoyé: ${result.successCount} ok, ${result.failureCount} échecs`);
+      console.log(`Envoye: ${result.successCount} ok, ${result.failureCount} echecs`);
       result.responses.forEach((resp, idx) => {
         if (!resp.success) {
           const code = resp.error && resp.error.code;
@@ -103,31 +104,68 @@ async function sendNotifications(tokens, title, body, data = {}) {
   }
 }
 
-// Notification nouveau message chat
+/**
+ * Supprime les vieux messages pour garder MAX_MESSAGES au maximum.
+ * Supprime aussi les fichiers Storage associes.
+ * @return {Promise<void>}
+ */
+async function cleanupOldMessages() {
+  const snap = await db.collection("chat")
+    .orderBy("timestamp", "asc")
+    .get();
+
+  if (snap.size <= MAX_MESSAGES) return;
+
+  const toDelete = snap.docs.slice(0, snap.size - MAX_MESSAGES);
+  console.log(`Nettoyage: suppression de ${toDelete.length} anciens messages`);
+
+  const batch = db.batch();
+  for (const doc of toDelete) {
+    const data = doc.data();
+    if (data.storagePath) {
+      try {
+        await bucket.file(data.storagePath).delete();
+        console.log(`Fichier supprime: ${data.storagePath}`);
+      } catch (e) {
+        console.log(`Fichier deja supprime: ${data.storagePath}`);
+      }
+    }
+    batch.delete(doc.ref);
+  }
+  await batch.commit();
+}
+
+// Notification nouveau message chat + cleanup automatique
 exports.onNewChatMessage = onDocumentCreated(
   {document: "chat/{messageId}", region: "europe-west1"},
   async (event) => {
     const message = event.data.data();
-    if (!message || !message.text || !message.sender) return;
+    if (!message || !message.sender) return;
+    if (!message.text && !message.mediaUrl) return;
+
+    // Garder seulement les 50 derniers messages
+    await cleanupOldMessages();
+
+    const title = `\u{1F4AC} ${message.sender}`;
+    let body;
+    if (message.mediaType === "image") body = "\u{1F4F7} Photo";
+    else if (message.mediaType === "video") body = "\u{1F3A5} Video";
+    else if (message.text) {
+      body = message.text.length > 100
+        ? message.text.substring(0, 97) + "..."
+        : message.text;
+    } else return;
 
     const mentions = message.mentions || [];
     let tokens;
-
     if (mentions.length > 0) {
-      // Message avec @mention → notifier uniquement les personnes mentionnées
-      console.log(`Mentions détectées: ${mentions.join(", ")}`);
+      console.log(`Mentions: ${mentions.join(", ")}`);
       tokens = await getTokensForUsers(mentions, message.sender);
     } else {
-      // Message sans mention → notifier tout le monde sauf l'expéditeur
       tokens = await getTokensExcept(message.sender);
     }
 
     if (tokens.length === 0) return;
-
-    const title = `💬 ${message.sender}`;
-    const body = message.text.length > 100
-      ? message.text.substring(0, 97) + "..."
-      : message.text;
 
     await sendNotifications(tokens, title, body, {
       type: "chat",
@@ -161,9 +199,9 @@ exports.onScheduleChange = onDocumentWritten(
       month: "long",
     });
 
-    const newShift = after[changedEmployee] || "Horaire supprimé";
-    const title = "🗓️ Planning modifié";
-    const body = `${changedEmployee} — ${dateFormatted} : ${newShift}`;
+    const newShift = after[changedEmployee] || "Horaire supprime";
+    const title = "\u{1F5D3}\uFE0F Planning modifie";
+    const body = `${changedEmployee} \u2014 ${dateFormatted} : ${newShift}`;
 
     const tokens = await getTokensExcept(changedEmployee);
     await sendNotifications(tokens, title, body, {
