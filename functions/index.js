@@ -183,13 +183,19 @@ exports.onScheduleChange = onDocumentWritten(
     const after = event.data.after.exists ? event.data.after.data() : {};
 
     let changedEmployee = null;
+    let changedValue = null;
+    let previousValue = null;
     for (const emp of Object.keys(after)) {
       if (after[emp] !== before[emp]) {
         changedEmployee = emp;
+        changedValue = after[emp];
+        previousValue = before[emp];
         break;
       }
     }
     if (!changedEmployee) return;
+    // Ignorer les changements de congés — gérés par onVacationAnnouncement
+    if (changedValue === "Congés 🌴" || previousValue === "Congés 🌴") return;
 
     const [year, month, day] = dateString.split("-").map(Number);
     const date = new Date(year, month - 1, day);
@@ -208,6 +214,33 @@ exports.onScheduleChange = onDocumentWritten(
       type: "schedule",
       date: dateString,
       sender: changedEmployee,
+    });
+  }
+);
+// Notification unique pour une période de congés
+exports.onVacationAnnouncement = onDocumentCreated(
+  {document: "vacationAnnouncements/{id}", region: "europe-west1"},
+  async (event) => {
+    const data = event.data.data();
+    if (!data || !data.employee || !data.startDate || !data.endDate) return;
+
+    const start = new Date(data.startDate + "T12:00:00");
+    const end = new Date(data.endDate + "T12:00:00");
+
+    const fmt = (d) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+
+    const isSameDay = data.startDate === data.endDate;
+    const title = "🌴 Congés enregistrés";
+    const body = isSameDay
+      ? `${data.employee} est en congés le ${fmt(start)}`
+      : `${data.employee} est en congés du ${fmt(start)} au ${fmt(end)}`;
+
+    const tokens = await getTokensExcept(data.employee);
+    if (tokens.length === 0) return;
+
+    await sendNotifications(tokens, title, body, {
+      type: "vacation",
+      sender: data.employee,
     });
   }
 );

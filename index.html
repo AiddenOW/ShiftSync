@@ -469,7 +469,19 @@ useEffect(() => {
                     const ds = generateDateString(l);
                     batch.set(db.collection('exceptions').doc(ds), { [employee]: type === 'add' ? "Congés 🌴" : firebase.firestore.FieldValue.delete() }, { merge: true });
                 }
-                batch.commit().then(() => { showToast("Calendrier mis à jour"); setVacationStart(''); setVacationEnd(''); });
+                batch.commit().then(() => {
+                    showToast("Calendrier mis à jour");
+                    // Envoyer une seule notification globale pour la période complète
+                    if (type === 'add') {
+                        db.collection('vacationAnnouncements').add({
+                            employee,
+                            startDate: vacationStart,
+                            endDate: vacationEnd,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                    setVacationStart(''); setVacationEnd('');
+                });
             };
 
             // --- Media Upload ---
@@ -679,7 +691,18 @@ useEffect(() => {
                     const ds = generateDateString(l);
                     batch.set(db.collection('exceptions').doc(ds), { [target]: type === 'add' ? "Congés 🌴" : firebase.firestore.FieldValue.delete() }, { merge: true });
                 }
-                batch.commit().then(() => { showToast(`Congés de ${target} mis à jour !`); setAdminVacStart(''); setAdminVacEnd(''); });
+                batch.commit().then(() => {
+                    showToast(`Congés de ${target} mis à jour !`);
+                    if (type === 'add') {
+                        db.collection('vacationAnnouncements').add({
+                            employee: target,
+                            startDate: adminVacStart,
+                            endDate: adminVacEnd,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                    setAdminVacStart(''); setAdminVacEnd('');
+                });
             };
 
             if (!employee) {
