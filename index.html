@@ -823,8 +823,6 @@ useEffect(() => {
                                         .map(n => ({ name: n, shift: getShiftForDate(dt, n) }))
                                         .filter(c => !c.shift.toLowerCase().includes('repos') && !c.shift.toLowerCase().includes('cong'))
                                         .sort((a, b) => extractStartHour(a.shift) - extractStartHour(b.shift));
-                                    const visibleColleagues = colleagues.slice(0, 3);
-                                    const extraCount = colleagues.length - visibleColleagues.length;
                                     return (
                                         <div key={ds} className={`glass p-5 rounded-[1.5rem] border transition-all ${isT ? 'ring-2 ring-purple-500/60 bg-white/70 dark:bg-slate-800/80 shadow-2xl border-purple-400/30' : 'border-white/30'}`}>
                                             <div className="flex justify-between items-center">
@@ -840,16 +838,11 @@ useEffect(() => {
                                             {colleagues.length > 0 && (
                                                 <div className={`mt-3 pt-3 border-t ${isT ? 'border-purple-300/30' : 'border-white/20'}`}>
                                                     <div className="flex flex-wrap gap-1.5">
-                                                        {visibleColleagues.map(c => (
+                                                        {colleagues.map(c => (
                                                             <span key={c.name} className={`text-[10px] font-black px-2.5 py-1 rounded-lg ${isT ? 'bg-purple-100/80 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' : 'glass text-slate-600 dark:text-slate-300 border border-white/20'}`}>
                                                                 {c.name} · {c.shift}
                                                             </span>
                                                         ))}
-                                                        {extraCount > 0 && (
-                                                            <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg ${isT ? 'bg-purple-100/80 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' : 'glass text-slate-600 dark:text-slate-300 border border-white/20'}`}>
-                                                                +{extraCount}
-                                                            </span>
-                                                        )}
                                                     </div>
                                                 </div>
                                             )}
