@@ -795,7 +795,7 @@ useEffect(() => {
 
                     {/* MODIFICATION ICI : On utilise w-full et on ajoute un pb-48 pour que le contenu puisse défiler derrière la barre du bas */}
                     <main className="max-w-md mx-auto px-4 w-full mt-6 pb-48">
-                        {(activeTab === 'me' || activeTab === 'team') && (
+                        {activeTab === 'me' && (
                             <div className="glass rounded-[2rem] p-2 mb-6 flex justify-between items-center shadow-sm border border-white/30">
                                 <button onClick={() => setCurrentViewDate(new Date(currentViewDate.setDate(currentViewDate.getDate()-7)))} className="p-3 opacity-50 hover:opacity-100 transition"><IconChevronLeft /></button>
                                 <button onClick={() => setCurrentViewDate(new Date())} className="flex flex-col items-center px-6 py-1 glass rounded-2xl border border-white/20 shadow-inner">
@@ -816,14 +816,17 @@ useEffect(() => {
                                     </button>
                                 </div>
                                 {wD.map(({ d, dt, ds, s }) => {
-                                    const isT = ds === todayStr; const isO = s.toLowerCase().includes('repos') || s.toLowerCase().includes('cong');
+                                    const isT = ds === todayStr;
+                                    const isO = s.toLowerCase().includes('repos') || s.toLowerCase().includes('cong');
+                                    const colleagues = EMPLOYEES
+                                        .filter(n => n !== employee)
+                                        .map(n => ({ name: n, shift: getShiftForDate(dt, n) }))
+                                        .filter(c => !c.shift.toLowerCase().includes('repos') && !c.shift.toLowerCase().includes('cong'))
+                                        .sort((a, b) => extractStartHour(a.shift) - extractStartHour(b.shift));
+                                    const visibleColleagues = colleagues.slice(0, 3);
+                                    const extraCount = colleagues.length - visibleColleagues.length;
                                     return (
-                                        <div key={ds} className={`glass p-5 rounded-[1.5rem] relative border border-white/30 transition-all ${isT ? 'ring-2 ring-purple-500/40 bg-white/70 dark:bg-slate-800/80 shadow-2xl' : ''}`}>
-                                            {isT && (
-                                                <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[9px] px-3.5 py-1.5 rounded-tr-[1.5rem] rounded-bl-[1.2rem] font-black uppercase tracking-tighter shadow-md z-10">
-                                                    Aujourd'hui
-                                                </div>
-                                            )}
+                                        <div key={ds} className={`glass p-5 rounded-[1.5rem] border transition-all ${isT ? 'ring-2 ring-purple-500/60 bg-white/70 dark:bg-slate-800/80 shadow-2xl border-purple-400/30' : 'border-white/30'}`}>
                                             <div className="flex justify-between items-center">
                                                 <div>
                                                     <h3 className="capitalize font-black text-xl tracking-tight">{d}</h3>
@@ -834,53 +837,29 @@ useEffect(() => {
                                                     <button onClick={() => setEditModal({ds, name: employee, curr: s})} className="p-2 opacity-30 hover:opacity-100 active:scale-90 transition-all"><IconEdit /></button>
                                                 </div>
                                             </div>
+                                            {colleagues.length > 0 && (
+                                                <div className={`mt-3 pt-3 border-t ${isT ? 'border-purple-300/30' : 'border-white/20'}`}>
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {visibleColleagues.map(c => (
+                                                            <span key={c.name} className={`text-[10px] font-black px-2.5 py-1 rounded-lg ${isT ? 'bg-purple-100/80 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' : 'glass text-slate-600 dark:text-slate-300 border border-white/20'}`}>
+                                                                {c.name} · {c.shift}
+                                                            </span>
+                                                        ))}
+                                                        {extraCount > 0 && (
+                                                            <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg ${isT ? 'bg-purple-100/80 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' : 'glass text-slate-600 dark:text-slate-300 border border-white/20'}`}>
+                                                                +{extraCount}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}
                             </div>
                         )}
 
-                        {activeTab === 'team' && (
-                            <div className="space-y-4 animate-in fade-in duration-300">
-                                <div className="glass p-2 rounded-[2rem] flex justify-between overflow-x-auto gap-1 border border-white/30 shadow-sm">
-                                    {DAYS_OF_WEEK.map((day, i) => {
-                                        const dt = new Date(currentMonday); dt.setDate(currentMonday.getDate() + i);
-                                        const isS = generateDateString(dt) === generateDateString(currentViewDate);
-                                        return (
-                                            <button key={day} onClick={() => setCurrentViewDate(dt)} className={`flex flex-col items-center justify-center min-w-[13%] h-14 rounded-2xl transition-all ${isS ? 'bg-gradient-to-b from-purple-500 to-indigo-600 text-white shadow-xl' : 'opacity-40 hover:opacity-100 font-bold'}`}>
-                                                <span className="text-[9px] uppercase font-black">{day.substring(0,3)}</span>
-                                                <span className="font-black text-lg">{dt.getDate()}</span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                                <h2 className="text-2xl font-black px-2 mt-8 tracking-tight">L'équipe du jour</h2>
-                                <div className="space-y-3">
-                                    {[...EMPLOYEES]
-                                        .sort((a, b) => {
-                                            const shiftA = getShiftForDate(currentViewDate, a);
-                                            const shiftB = getShiftForDate(currentViewDate, b);
-                                            return extractStartHour(shiftA) - extractStartHour(shiftB);
-                                        })
-                                        .map(n => {
-                                            const s = getShiftForDate(currentViewDate, n); 
-                                            const isO = s.toLowerCase().includes('repos') || s.toLowerCase().includes('cong');
-                                            return (
-                                                <div key={n} className="glass p-4 rounded-[1.5rem] flex justify-between items-center border border-white/20 transition-all">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className={`w-11 h-11 rounded-full flex items-center justify-center font-black shadow-inner text-lg ${isO ? 'glass border border-white/40 opacity-50' : 'bg-gradient-to-br from-purple-100 to-indigo-100 text-purple-700 dark:from-purple-900/40 dark:to-indigo-900/40 dark:text-purple-300'}`}>{n.charAt(0)}</div>
-                                                        <span className="font-black text-lg tracking-tight">{n} {n === employee && <span className="text-[9px] bg-purple-600 text-white px-2 py-0.5 rounded-full uppercase ml-2 shadow-sm font-black">Moi</span>}</span>
-                                                    </div>
-                                                    <div className={`px-4 py-2.5 rounded-2xl font-black text-sm transition-colors ${isO ? 'opacity-30 text-slate-500 bg-slate-200/50 dark:bg-slate-800/50' : 'bg-purple-100/50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-200 shadow-sm'}`}>
-                                                        {s}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })
-                                    }
-                                </div>
-                            </div>
-                        )}
+
 
                         {activeTab === 'vacances' && (
                             <div className="space-y-6 pb-20">
@@ -1025,10 +1004,7 @@ useEffect(() => {
                     <nav className="fixed bottom-0 left-0 right-0 glass-strong pt-4 pb-4 px-6 flex justify-between shadow-[0_-15px_40px_rgba(0,0,0,0.1)] z-50 border-t border-white/30">
                         <div className="max-w-md mx-auto w-full flex justify-between gap-2">
                             <button onClick={() => setActiveTab('me')} className={`flex-1 flex flex-col items-center py-3 rounded-2xl transition-all ${activeTab === 'me' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
-                                <IconUser /><span className="text-[9px] font-black uppercase mt-1 tracking-tighter">Moi</span>
-                            </button>
-                            <button onClick={() => setActiveTab('team')} className={`flex-1 flex flex-col items-center py-3 rounded-2xl transition-all ${activeTab === 'team' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
-                                <IconUsers /><span className="text-[9px] font-black uppercase mt-1 tracking-tighter">Équipe</span>
+                                <IconUser /><span className="text-[9px] font-black uppercase mt-1 tracking-tighter">Planning</span>
                             </button>
                             <button onClick={() => setActiveTab('vacances')} className={`flex-1 flex flex-col items-center py-3 rounded-2xl transition-all ${activeTab === 'vacances' ? 'bg-purple-600/10 text-purple-700 dark:text-purple-400 shadow-inner border border-purple-500/20' : 'opacity-40 hover:opacity-70'}`}>
                                 <IconPlane /><span className="text-[9px] font-black uppercase mt-1 tracking-tighter">Congés</span>
