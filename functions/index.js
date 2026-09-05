@@ -244,3 +244,58 @@ exports.onVacationAnnouncement = onDocumentCreated(
     });
   }
 );
+// Notification demande d'échange
+exports.onSwapRequest = onDocumentCreated(
+  {document: "shiftSwapRequests/{id}", region: "europe-west1"},
+  async (event) => {
+    const req = event.data.data();
+    if (!req || req.status !== "pending") return;
+
+    const dateObj = new Date(req.date + "T12:00:00");
+    const dateFmt = dateObj.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+
+    const title = "🔄 Proposition d'échange";
+    const body = `${req.fromEmployee} propose d'échanger le ${dateFmt} (${req.fromShift} ↔ ${req.toShift})`;
+
+    const tokens = await getTokensForUsers([req.toEmployee], req.fromEmployee);
+    await sendNotifications(tokens, title, body, { type: "swap", sender: req.fromEmployee });
+  }
+);
+
+// Traitement de la réponse à un échange
+exports.onSwapResponse = onDocumentWritten(
+  {document: "shiftSwapRequests/{id}", region: "europe-west1"},
+  async (event) => {
+    const before = event.data.before.exists ? event.data.before.data() : null;
+    const after = event.data.after.exists ? event.data.after.data() : null;
+    if (!before || !after) return;
+    if (before.status === after.status) return;
+    if (after.status !== "accepted" && after.status !== "declined") return;
+
+    const req = after;
+    const dateObj = new Date(req.date + "T12:00:00");
+    const dateFmt = dateObj.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+
+    if (after.status === "accepted") {
+      // Appliquer l'échange dans exceptions
+      const docRef = db.collection("exceptions").doc(req.date);
+      await docRef.set({
+        [req.fromEmployee]: req.toShift,
+        [req.toEmployee]: req.fromShift,
+      }, { merge: true });
+
+      // Notifier tout le monde
+      const allSnap = await db.collection("fcmTokens").get();
+      const allTokens = allSnap.docs.map((d) => d.data().token).filter(Boolean);
+      const title = "✅ Échange confirmé";
+      const body = `${req.fromEmployee} et ${req.toEmployee} ont échangé leurs horaires du ${dateFmt}`;
+      await sendNotifications(allTokens, title, body, { type: "swap_confirmed" });
+    } else if (after.status === "declined") {
+      // Notifier uniquement l'émetteur
+      const tokens = await getTokensForUsers([req.fromEmployee], req.toEmployee);
+      const title = "❌ Échange refusé";
+      const body = `${req.toEmployee} a refusé l'échange du ${dateFmt}`;
+      await sendNotifications(tokens, title, body, { type: "swap_declined" });
+    }
+  }
+);
